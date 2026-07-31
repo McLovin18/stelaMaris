@@ -49,7 +49,7 @@ const cardStyles = `
     position: relative;
     width: 100%;
     /* aspect-ratio cuadrado en mobile, más alto en desktop */
-    aspect-ratio: 1 / 1.05;
+    aspect-ratio: 1 / 1;
     background: var(--galleryImgBg);
     overflow: hidden;
     flex-shrink: 0;
@@ -57,13 +57,13 @@ const cardStyles = `
 
   @media (min-width: 640px) {
     .pc-img-wrap {
-      aspect-ratio: 3 / 3.8;
+      aspect-ratio: 4 / 4;
     }
   }
 
   .pc-img-wrap img {
     object-fit: contain !important;
-    padding: 8% !important;
+    padding: 0% !important;
     transition: transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94) !important;
   }
 
