@@ -65,7 +65,7 @@ export default function FeaturedCategoriesSection({
               className="group block w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] md:p-1 hover:border-[var(--primary)] hover:bg-[var(--muted)] transition-colors cursor-pointer"
             >
               {cat.image && (
-                <div className="aspect-square w-full h-40 sm:h-60 md:h-80 rounded-xl overflow-hidden bg-[var(--muted)] mb-3">
+                <div className="aspect-square w-full h-40 sm:h-60 md:h-80 overflow-hidden bg-[var(--muted)] mb-3">
                   <img
                     src={cat.image}
                     alt={cat.title || "Categoría"}
