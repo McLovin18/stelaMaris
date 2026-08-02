@@ -15,6 +15,7 @@ import {
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
+
 export default function SearchResultsPage() {
   const searchParams = useSearchParams();
   const queryParam = searchParams?.get("query") || "";
