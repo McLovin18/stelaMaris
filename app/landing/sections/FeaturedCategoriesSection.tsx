@@ -62,7 +62,7 @@ export default function FeaturedCategoriesSection({
             <a
               key={idx}
               href={cat.link || "#"}
-              className="group block w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] md:p-1 hover:border-[var(--primary)] hover:bg-[var(--muted)] transition-colors cursor-pointer"
+              className="group block w-full border border-[var(--border)] bg-[var(--card)] md:p-1 hover:border-[var(--primary)] hover:bg-[var(--muted)] transition-colors cursor-pointer"
             >
               {cat.image && (
                 <div className="aspect-square w-full h-40 sm:h-60 md:h-80 overflow-hidden bg-[var(--muted)] mb-3">
