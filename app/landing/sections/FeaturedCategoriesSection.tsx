@@ -65,11 +65,11 @@ export default function FeaturedCategoriesSection({
               className="group block w-full border border-[var(--border)] bg-[var(--card)] md:p-1 hover:border-[var(--primary)] hover:bg-[var(--muted)] transition-colors cursor-pointer"
             >
               {cat.image && (
-                <div className="aspect-square w-full h-40 sm:h-60 md:h-80 overflow-hidden bg-[var(--muted)] mb-3">
+                <div className="w-full h-64 sm:h-[26rem] md:h-[36rem] overflow-hidden bg-[var(--muted)] mb-3">
                   <img
                     src={cat.image}
                     alt={cat.title || "Categoría"}
-                    className="w-full h-full rounded-2xl object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
               )}
