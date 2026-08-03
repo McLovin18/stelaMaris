@@ -8,6 +8,8 @@ import React, { useState } from "react";
  * - Al hacer click despliega hacia arriba los íconos de contacto (Ubicación, Instagram, WhatsApp).
  * - Al volver a hacer click, se ocultan.
  * - Al hacer hover/click sobre WhatsApp, se despliegan a un lado 2 contactos (Asesora 1 y Asesora 2).
+ * - Al hacer hover/click sobre Instagram, se despliegan a un lado 2 contactos directos de la dueña
+ *   (Instagram DM y WhatsApp).
  * - Colores tomados de la paleta del proyecto (mahogany, tobacco, mountain, sand, vanilla).
  */
 
@@ -16,13 +18,19 @@ const WHATSAPP_URL_2 = "https://wa.me/593987203233"; // 👉 Asesora 2 — reemp
 const INSTAGRAM_URL = "https://www.instagram.com/juliana.basics/";
 const MAPS_URL = "https://l.instagram.com/?u=https%3A%2F%2Fmaps.app.goo.gl%2FB4LVAYLxvMuwXsuE9%3Fg_st%3Dic%26utm_source%3Dig%26utm_medium%3Dsocial%26utm_content%3Dlink_in_bio%26fbclid%3DPAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGn_oqrYzsBMtPRc2N2aptDbGXg-iG5-VFhRCD6m4VnleH_jHY5zLezUdJza74_aem_B3z_UlltnRGnSSLfWrFf4w&e=AUD8pWkXfdA34eOteUrOjVR1HPRDj6F7-to54sCO4vLiuhm1_Mlp2-GkL3MlI46kCH00PHVdOMrM-W9V32NSvMywrrydKa5uKx-XFxb_vRVGZuWMIZrLC9G1j6ofwMn3GLJ2er0"; // 👉 reemplaza por el enlace real de Google Maps
 
+// 👉 Contacto directo de la dueña (submenú de Instagram)
+const OWNER_INSTAGRAM_DM_URL = "https://www.instagram.com/juliana.basics/"; // 👉 reemplaza por el username real
+const OWNER_WHATSAPP_URL = "https://wa.me/593992020233"; // 👉 reemplaza por el número real de la dueña
+
 const FloatingContactButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isWhatsappOpen, setIsWhatsappOpen] = useState(false);
+  const [isInstagramOpen, setIsInstagramOpen] = useState(false);
 
   const closeAll = () => {
     setIsOpen(false);
     setIsWhatsappOpen(false);
+    setIsInstagramOpen(false);
   };
 
   return (
@@ -94,6 +102,8 @@ const FloatingContactButton: React.FC = () => {
         .fab-item.instagram {
           background: var(--color-mountain, #aaa396);
           transition-delay: 0.06s;
+          position: relative;
+          z-index: 2;
         }
 
         .fab-item.whatsapp {
@@ -104,12 +114,14 @@ const FloatingContactButton: React.FC = () => {
         }
 
         /* --- Wrapper de WhatsApp (contiene el botón + submenú lateral) --- */
-        .fab-whatsapp-wrap {
+        .fab-whatsapp-wrap,
+        .fab-instagram-wrap {
           position: relative;
         }
 
         /* --- Submenú lateral de WhatsApp (2 asesoras, apiladas verticalmente) --- */
-        .fab-whatsapp-sub {
+        .fab-whatsapp-sub,
+        .fab-instagram-sub {
           position: absolute;
           right: calc(100% + 12px);
           top: 50%;
@@ -135,6 +147,10 @@ const FloatingContactButton: React.FC = () => {
           pointer-events: none;
           transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.22s ease;
           position: relative;
+        }
+
+        .fab-sub-item.instagram-dm {
+          background: var(--color-mountain, #aaa396);
         }
 
         @media (min-width: 768px) {
@@ -169,7 +185,7 @@ const FloatingContactButton: React.FC = () => {
           transition-delay: 0.05s;
         }
 
-        /* Etiqueta con el nombre de la asesora */
+        /* Etiqueta con el nombre del contacto */
         .fab-sub-label {
           position: absolute;
           right: calc(100% + 10px);
@@ -334,19 +350,63 @@ const FloatingContactButton: React.FC = () => {
           </svg>
         </a>
 
-        {/* Instagram */}
-        <a
-          href={INSTAGRAM_URL}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Instagram"
-          className={`fab-item instagram ${isOpen ? "open" : ""}`}
-          tabIndex={isOpen ? 0 : -1}
+        {/* Instagram + submenú de contacto directo (DM / WhatsApp de la dueña) */}
+        <div
+          className="fab-instagram-wrap"
+          onMouseEnter={() => isOpen && setIsInstagramOpen(true)}
+          onMouseLeave={() => setIsInstagramOpen(false)}
         >
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.64.42 1.37.47 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.64.25-1.37.42-2.43.47-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.26-.66.6-1.22 1.15-1.77a4.9 4.9 0 0 1 1.77-1.15c.64-.25 1.37-.42 2.43-.47C8.94 2.01 9.28 2 12 2zm0 1.8c-2.67 0-2.99.01-4.04.06-.87.04-1.34.18-1.65.3-.42.16-.72.35-1.03.66-.31.31-.5.61-.66 1.03-.12.31-.26.78-.3 1.65C4.27 8.55 4.26 8.87 4.26 12s.01 3.45.06 4.5c.04.87.18 1.34.3 1.65.16.42.35.72.66 1.03.31.31.61.5 1.03.66.31.12.78.26 1.65.3 1.05.05 1.37.06 4.04.06s2.99-.01 4.04-.06c.87-.04 1.34-.18 1.65-.3.42-.16.72-.35 1.03-.66.31-.31.5-.61.66-1.03.12-.31.26-.78.3-1.65.05-1.05.06-1.37.06-4.5s-.01-3.45-.06-4.5c-.04-.87-.18-1.34-.3-1.65a2.77 2.77 0 0 0-.66-1.03 2.77 2.77 0 0 0-1.03-.66c-.31-.12-.78-.26-1.65-.3C14.99 3.81 14.67 3.8 12 3.8zm0 3.05a5.15 5.15 0 1 1 0 10.3 5.15 5.15 0 0 1 0-10.3zm0 1.8a3.35 3.35 0 1 0 0 6.7 3.35 3.35 0 0 0 0-6.7zm5.35-1.99a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0z" />
-          </svg>
-        </a>
+          {/* Submenú lateral: Instagram DM y WhatsApp de la dueña */}
+          <div className="fab-instagram-sub">
+            <a
+              href={OWNER_INSTAGRAM_DM_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Escríbenos por Instagram"
+              className={`fab-sub-item instagram-dm ${isOpen && isInstagramOpen ? "open" : ""}`}
+              tabIndex={isOpen && isInstagramOpen ? 0 : -1}
+            >
+              <span className="fab-sub-label">Instagram</span>
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.64.42 1.37.47 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.64.25-1.37.42-2.43.47-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.26-.66.6-1.22 1.15-1.77a4.9 4.9 0 0 1 1.77-1.15c.64-.25 1.37-.42 2.43-.47C8.94 2.01 9.28 2 12 2zm0 1.8c-2.67 0-2.99.01-4.04.06-.87.04-1.34.18-1.65.3-.42.16-.72.35-1.03.66-.31.31-.5.61-.66 1.03-.12.31-.26.78-.3 1.65C4.27 8.55 4.26 8.87 4.26 12s.01 3.45.06 4.5c.04.87.18 1.34.3 1.65.16.42.35.72.66 1.03.31.31.61.5 1.03.66.31.12.78.26 1.65.3 1.05.05 1.37.06 4.04.06s2.99-.01 4.04-.06c.87-.04 1.34-.18 1.65-.3.42-.16.72-.35 1.03-.66.31-.31.5-.61.66-1.03.12-.31.26-.78.3-1.65.05-1.05.06-1.37.06-4.5s-.01-3.45-.06-4.5c-.04-.87-.18-1.34-.3-1.65a2.77 2.77 0 0 0-.66-1.03 2.77 2.77 0 0 0-1.03-.66c-.31-.12-.78-.26-1.65-.3C14.99 3.81 14.67 3.8 12 3.8zm0 3.05a5.15 5.15 0 1 1 0 10.3 5.15 5.15 0 0 1 0-10.3zm0 1.8a3.35 3.35 0 1 0 0 6.7 3.35 3.35 0 0 0 0-6.7zm5.35-1.99a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0z" />
+              </svg>
+            </a>
+
+            <a
+              href={OWNER_WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="WhatsApp de la dueña"
+              className={`fab-sub-item ${isOpen && isInstagramOpen ? "open" : ""}`}
+              tabIndex={isOpen && isInstagramOpen ? 0 : -1}
+            >
+              <span className="fab-sub-label">WhatsApp</span>
+              <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M19.11 17.205c-.372 0-1.088 1.39-1.518 1.39a.63.63 0 0 1-.315-.1c-.802-.402-1.504-.817-2.163-1.447-.545-.516-1.146-1.29-1.46-1.963a.426.426 0 0 1-.073-.215c0-.33.99-.945.99-1.49 0-.143-.73-2.09-.832-2.335-.143-.372-.214-.487-.6-.487-.187 0-.36-.043-.53-.043-.302 0-.53.115-.746.315-.688.645-1.032 1.318-1.06 2.264v.114c-.015.99.472 1.977 1.017 2.78 1.23 1.82 2.506 3.41 4.554 4.34.616.287 2.035.888 2.722.888.817 0 2.15-.515 2.478-1.318.13-.33.244-.73.244-1.088 0-.058 0-.144-.03-.215-.1-.172-2.434-1.39-2.678-1.39zm-2.908 7.593c-1.747 0-3.48-.53-4.942-1.49L7.793 24.41l1.132-3.337a8.955 8.955 0 0 1-1.72-5.272c0-4.955 4.04-8.995 8.997-8.995S25.2 10.845 25.2 15.8c0 4.958-4.04 8.998-8.998 8.998zm0-19.798c-5.96 0-10.8 4.842-10.8 10.8 0 1.964.53 3.898 1.546 5.574L5 27.176l5.974-1.92a10.807 10.807 0 0 0 16.03-9.455c0-5.958-4.842-10.8-10.802-10.8z" />
+              </svg>
+            </a>
+          </div>
+
+          {/* Botón principal de Instagram */}
+          <button
+            type="button"
+            aria-label="Contactar por Instagram"
+            aria-expanded={isOpen && isInstagramOpen}
+            className={`fab-item instagram ${isOpen ? "open" : ""}`}
+            tabIndex={isOpen ? 0 : -1}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isOpen) {
+                setIsWhatsappOpen(false);
+                setIsInstagramOpen((prev) => !prev);
+              }
+            }}
+          >
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.22.6 1.77 1.15.55.55.9 1.11 1.15 1.77.25.64.42 1.37.47 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.15 1.77 4.9 4.9 0 0 1-1.77 1.15c-.64.25-1.37.42-2.43.47-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.15 4.9 4.9 0 0 1-1.15-1.77c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.26-.66.6-1.22 1.15-1.77a4.9 4.9 0 0 1 1.77-1.15c.64-.25 1.37-.42 2.43-.47C8.94 2.01 9.28 2 12 2zm0 1.8c-2.67 0-2.99.01-4.04.06-.87.04-1.34.18-1.65.3-.42.16-.72.35-1.03.66-.31.31-.5.61-.66 1.03-.12.31-.26.78-.3 1.65C4.27 8.55 4.26 8.87 4.26 12s.01 3.45.06 4.5c.04.87.18 1.34.3 1.65.16.42.35.72.66 1.03.31.31.61.5 1.03.66.31.12.78.26 1.65.3 1.05.05 1.37.06 4.04.06s2.99-.01 4.04-.06c.87-.04 1.34-.18 1.65-.3.42-.16.72-.35 1.03-.66.31-.31.5-.61.66-1.03.12-.31.26-.78.3-1.65.05-1.05.06-1.37.06-4.5s-.01-3.45-.06-4.5c-.04-.87-.18-1.34-.3-1.65a2.77 2.77 0 0 0-.66-1.03 2.77 2.77 0 0 0-1.03-.66c-.31-.12-.78-.26-1.65-.3C14.99 3.81 14.67 3.8 12 3.8zm0 3.05a5.15 5.15 0 1 1 0 10.3 5.15 5.15 0 0 1 0-10.3zm0 1.8a3.35 3.35 0 1 0 0 6.7 3.35 3.35 0 0 0 0-6.7zm5.35-1.99a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0z" />
+            </svg>
+          </button>
+        </div>
 
         {/* WhatsApp + submenú de 2 asesoras */}
         <div
@@ -394,7 +454,10 @@ const FloatingContactButton: React.FC = () => {
             tabIndex={isOpen ? 0 : -1}
             onClick={(e) => {
               e.stopPropagation();
-              if (isOpen) setIsWhatsappOpen((prev) => !prev);
+              if (isOpen) {
+                setIsInstagramOpen(false);
+                setIsWhatsappOpen((prev) => !prev);
+              }
             }}
           >
             <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -422,7 +485,6 @@ const FloatingContactButton: React.FC = () => {
               }
             }}
           >
-            {/* Ícono de burbuja de chat (contáctanos) */}
             <svg
               className={`fab-icon-bell ${isOpen ? "hidden" : ""}`}
               viewBox="0 0 24 24"
@@ -432,7 +494,6 @@ const FloatingContactButton: React.FC = () => {
               <path d="M12 2C6.48 2 2 5.94 2 10.8c0 2.42 1.12 4.6 2.94 6.17-.1 1.14-.5 2.53-1.28 3.85a.5.5 0 0 0 .58.73c1.87-.5 3.6-1.34 4.7-1.99a11.6 11.6 0 0 0 3.06.4c5.52 0 10-3.94 10-8.8S17.52 2 12 2zm-4.6 9.8a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4zm4.6 0a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4zm4.6 0a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4z" />
             </svg>
 
-            {/* Ícono de cerrar (X) */}
             <svg
               className={`fab-icon-close ${isOpen ? "visible" : ""}`}
               viewBox="0 0 24 24"
