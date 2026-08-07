@@ -32,6 +32,7 @@ const IconLocation = () => (
 
 const socialLinks = [
   { href: "https://www.instagram.com/juliana.basics/", label: "Instagram", Icon: IconInstagram },
+  { href: "https://wa.me/593988705890", label: "WhatsApp", Icon: IconWhatsApp },
 ];
 
 // 👉 Reemplaza estos 3 valores con la información real del negocio

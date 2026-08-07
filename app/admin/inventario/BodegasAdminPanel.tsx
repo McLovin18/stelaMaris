@@ -16,7 +16,7 @@ export default function BodegasAdminPanel() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ nombre: "", tiempoEntrega: 72 });
+  const [formData, setFormData] = useState({ nombre: "", tiempoEntrega: 24 });
   const [error, setError] = useState("");
   const [settingNuevaColeccion, setSettingNuevaColeccion] = useState(false);
 
@@ -45,7 +45,7 @@ export default function BodegasAdminPanel() {
       } else {
         await crearBodega(formData.nombre, formData.tiempoEntrega);
       }
-      setFormData({ nombre: "", tiempoEntrega: 72 });
+      setFormData({ nombre: "", tiempoEntrega: 24 });
       setEditingId(null);
       setShowForm(false);
     } catch (err) {
@@ -74,7 +74,7 @@ export default function BodegasAdminPanel() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingId(null);
-    setFormData({ nombre: "", tiempoEntrega: 72 });
+    setFormData({ nombre: "", tiempoEntrega: 24 });
     setError("");
   };
 
@@ -179,14 +179,9 @@ export default function BodegasAdminPanel() {
                 onChange={(e) => setFormData({ ...formData, tiempoEntrega: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
               >
-                <option value={12}>12 horas (Rápida)</option>
+                <option value={24}>24 horas (Rápida)</option>
                 <option value={72}>72 horas (Estándar)</option>
               </select>
-              {editingId === "MarcaEstilo" && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  La bodega MarcaEstilo siempre tiene entrega de 12 horas
-                </p>
-              )}
             </div>
 
             <div className="flex gap-3 pt-4">
@@ -223,11 +218,6 @@ export default function BodegasAdminPanel() {
               <div className="flex-1">
                 <h3 className="font-bold text-slate-900 dark:text-white">
                   {bodega.nombre}
-                  {bodega.id === "MarcaEstilo" && (
-                    <span className="ml-2 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">
-                      Default
-                    </span>
-                  )}
                 </h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                   Entrega: {bodega.tiempoEntrega} horas laborales
@@ -249,11 +239,6 @@ export default function BodegasAdminPanel() {
                       Eliminar
                     </button>
                   </>
-                )}
-                {bodega.id === "MarcaEstilo" && (
-                  <span className="text-xs text-slate-400 dark:text-slate-500">
-                    No se puede eliminar
-                  </span>
                 )}
               </div>
             </div>

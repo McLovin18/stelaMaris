@@ -167,7 +167,7 @@ const cardStyles = `
     font-style: italic;
     font-weight: 600;
     font-size: 13px;
-    line-height: 1.25;
+    line-height: 1.3;
     color: #ffffff;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -177,11 +177,16 @@ const cardStyles = `
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
     text-decoration-color: rgba(255,255,255,0.35);
+    min-height: 2.6em;
+    max-height: 2.6em;
+    align-items: flex-start;
   }
 
   @media (min-width: 640px) {
     .pc-name {
       font-size: 15px;
+      min-height: 2.6em;
+      max-height: 2.6em;
     }
   }
 
