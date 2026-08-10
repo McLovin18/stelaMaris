@@ -615,7 +615,27 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
                     </div>
                   )}
 
-                  {/* Controles: subir / bajar / eliminar. Siempre visibles en
+                  {/* Botón de eliminar - siempre visible en esquina superior derecha */}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImagen(idx)}
+                    className="absolute top-2 right-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-colors"
+                    aria-label="Eliminar imagen"
+                  >
+                    <span className="material-icons-round text-base">delete</span>
+                  </button>
+
+                  {/* Número de orden en la esquina */}
+                  <div className="absolute top-2 left-2 bg-rose-500 text-white rounded-lg px-2.5 py-1 text-xs font-bold">
+                    {idx + 1}
+                  </div>
+
+                  {/* Etiqueta de tipo - movida debajo del botón eliminar */}
+                  <div className="absolute top-2 right-12 bg-white/90 text-slate-700 rounded-lg px-2 py-1 text-[10px] font-semibold truncate max-w-[calc(100%-4rem)]">
+                    {isFile ? "Archivo" : "URL"}
+                  </div>
+
+                  {/* Controles: subir / bajar. Siempre visibles en
                       móvil (no dependen de :hover, que no existe con el dedo) */}
                   <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 rounded-b-xl bg-black/55 px-1.5 py-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button
@@ -629,14 +649,6 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleRemoveImagen(idx)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 text-white"
-                      aria-label="Eliminar imagen"
-                    >
-                      <span className="material-icons-round text-base">delete</span>
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => moverImagen(idx, 1)}
                       disabled={idx === imagenes.length - 1}
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-700 disabled:opacity-30"
@@ -644,16 +656,6 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
                     >
                       <span className="material-icons-round text-base">chevron_right</span>
                     </button>
-                  </div>
-
-                  {/* Número de orden en la esquina */}
-                  <div className="absolute top-2 left-2 bg-rose-500 text-white rounded-lg px-2.5 py-1 text-xs font-bold">
-                    {idx + 1}
-                  </div>
-
-                  {/* Etiqueta de tipo */}
-                  <div className="absolute top-2 right-2 bg-white/90 text-slate-700 rounded-lg px-2 py-1 text-[10px] font-semibold truncate max-w-[calc(100%-2.5rem)]">
-                    {isFile ? "Archivo" : "URL"}
                   </div>
                 </div>
               );

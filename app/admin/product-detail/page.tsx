@@ -43,29 +43,49 @@ export default function ProductDetailPage({ params }) {
       setLoading(true);
       const id = params?.id || searchParams.get("id");
       if (!id) { setProducto(null); setRelacionados([]); setLoading(false); return; }
+      
+      // Cargar producto principal
       const prod = await obtenerProductoPorId(id);
       setProducto(prod);
-      setLoading(false);
-      fetchReviews(id);
+      
+      // Cargar reviews y relacionados en paralelo después de tener el producto
       if (prod) {
-        let rel = [];
-        console.log("[RELACIONADOS] subsubcategoria:", prod.subsubcategoria, "subcategoria:", prod.subcategoria, "categoria:", prod.categoria);
-        if (prod.subsubcategoria) {
-          rel = await obtenerProductosPorSubsubcategoria(prod.subsubcategoria, prod.id, 5);
-          console.log("[RELACIONADOS] encontrados por subsubcategoria:", rel);
-        }
-        if ((!rel || rel.length === 0) && prod.subcategoria) {
-          rel = await obtenerProductosPorSubcategoria(prod.subcategoria, prod.id, 5);
-          console.log("[RELACIONADOS] encontrados por subcategoria:", rel);
-        }
-        if ((!rel || rel.length === 0) && prod.categoria) {
-          rel = await obtenerProductosPorCategoria(prod.categoria, prod.id, 5);
-          console.log("[RELACIONADOS] encontrados por categoria:", rel);
-        }
-        setRelacionados(rel);
+        // Ejecutar reviews y relacionados en paralelo
+        Promise.all([
+          fetchReviews(id),
+          (async () => {
+            let rel = [];
+            console.log("[RELACIONADOS] subsubcategoria:", prod.subsubcategoria, "subcategoria:", prod.subcategoria, "categoria:", prod.categoria);
+            
+            // Intentar subsubcategoria primero
+            if (prod.subsubcategoria) {
+              rel = await obtenerProductosPorSubsubcategoria(prod.subsubcategoria, prod.id, 5);
+              console.log("[RELACIONADOS] encontrados por subsubcategoria:", rel);
+            }
+            
+            // Fallback a subcategoria si no hay resultados
+            if ((!rel || rel.length === 0) && prod.subcategoria) {
+              rel = await obtenerProductosPorSubcategoria(prod.subcategoria, prod.id, 5);
+              console.log("[RELACIONADOS] encontrados por subcategoria:", rel);
+            }
+            
+            // Fallback a categoria si aún no hay resultados
+            if ((!rel || rel.length === 0) && prod.categoria) {
+              rel = await obtenerProductosPorCategoria(prod.categoria, prod.id, 5);
+              console.log("[RELACIONADOS] encontrados por categoria:", rel);
+            }
+            
+            setRelacionados(rel);
+          })()
+        ]).catch(err => {
+          console.error("Error cargando datos adicionales:", err);
+          setRelacionados([]);
+        });
       } else {
         setRelacionados([]);
       }
+      
+      setLoading(false);
     }
     fetchProducto();
     // eslint-disable-next-line
