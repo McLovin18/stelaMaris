@@ -31,14 +31,14 @@ const IconLocation = () => (
 );
 
 const socialLinks = [
-  { href: "https://www.instagram.com/juliana.basics/", label: "Instagram", Icon: IconInstagram },
-  { href: "https://wa.me/593988705890", label: "WhatsApp", Icon: IconWhatsApp },
+  { href: "https://www.instagram.com/stellamaris.straw/", label: "Instagram", Icon: IconInstagram },
+  { href: "https://wa.me/593939945347", label: "WhatsApp", Icon: IconWhatsApp },
 ];
 
 // 👉 Reemplaza estos 3 valores con la información real del negocio
-const WHATSAPP_NUMBER = "593988705890"; // solo números, con código de país, sin '+' ni espacios
-const WHATSAPP_DISPLAY = "+593 98 870 5890"; // como se muestra al usuario
-const MAPS_URL = "https://l.instagram.com/?u=https%3A%2F%2Fmaps.app.goo.gl%2FB4LVAYLxvMuwXsuE9%3Fg_st%3Dic%26utm_source%3Dig%26utm_medium%3Dsocial%26utm_content%3Dlink_in_bio%26fbclid%3DPAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGn_oqrYzsBMtPRc2N2aptDbGXg-iG5-VFhRCD6m4VnleH_jHY5zLezUdJza74_aem_B3z_UlltnRGnSSLfWrFf4w&e=AUD8pWkXfdA34eOteUrOjVR1HPRDj6F7-to54sCO4vLiuhm1_Mlp2-GkL3MlI46kCH00PHVdOMrM-W9V32NSvMywrrydKa5uKx-XFxb_vRVGZuWMIZrLC9G1j6ofwMn3GLJ2er0"; // enlace real de Google Maps
+const WHATSAPP_NUMBER = "593939945347"; // solo números, con código de país, sin '+' ni espacios
+const WHATSAPP_DISPLAY = "+593 93 994 5347"; // como se muestra al usuario
+const MAPS_URL = "https://maps.google.com"; // enlace real de Google Maps
 
 const Footer: React.FC = () => {
   const pathname = usePathname();
@@ -58,14 +58,14 @@ const Footer: React.FC = () => {
 
             {/* Columna 1: Información de la tienda */}
             <div className="flex flex-col items-center md:items-start text-center md:text-left gap-1">
-              <span className="text-base font-bold tracking-wide text-[var(--text)]">
-                Juliana Basics
+              <span className="text-base font-bold tracking-wide text-white">
+                Stella Maris 👛
               </span>
-              <span className="text-xs text-[var(--textSecondary)]">
-                Moda &amp; Outfits
+              <span className="text-xs text-white">
+                by Gabriela Cárdenas
               </span>
-              <p className="text-xs text-[var(--textSecondary)] mt-1 max-w-[220px]">
-                Encuentra las últimas tendencias en ropa y accesorios, pensadas para cada estilo.
+              <p className="text-xs text-white mt-1 max-w-[220px]">
+                Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia.
               </p>
             </div>
 
@@ -95,7 +95,7 @@ const Footer: React.FC = () => {
                 href={`https://wa.me/${WHATSAPP_NUMBER}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 text-xs text-[var(--textSecondary)] hover:text-white transition-colors"
+                className="flex items-center gap-2 text-xs text-white hover:text-white transition-colors"
                 onClick={() => trackLinkClick().catch(console.error)}
               >
                 <IconWhatsApp />
@@ -106,11 +106,11 @@ const Footer: React.FC = () => {
                 href={MAPS_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 text-xs text-[var(--textSecondary)] hover:text-white transition-colors"
+                className="flex items-center gap-2 text-xs text-white hover:text-white transition-colors"
                 onClick={() => trackLinkClick().catch(console.error)}
               >
                 <IconLocation />
-                <span>ɢʏᴇ - ᴀʟʙᴏʀᴀᴅᴀ 𝟪ᴠᴀ ᴇᴛᴀᴘᴀ</span>
+                <span>Ecuador 🇪🇨</span>
               </a>
             </div>
           </div>
@@ -122,7 +122,7 @@ const Footer: React.FC = () => {
         {/* Copyright row */}
         <div className={styles.ftCopyRow}>
           <p className={styles.ftCopyText}>
-            © {new Date().getFullYear()} Juliana Basics 2026. Todos los derechos reservados.
+            © {new Date().getFullYear()} Stella Maris 👛 by Gabriela Cárdenas. Todos los derechos reservados.
           </p>
           <div className={styles.ftCopyRight}>
             <div className={styles.ftBadge}>
@@ -130,13 +130,13 @@ const Footer: React.FC = () => {
               Hecho en Ecuador
             </div>
             <a
-              href="https://www.instagram.com/hector.cobena/"
+              href="https://www.instagram.com/stellamaris.straw/"
               target="_blank"
               rel="noreferrer"
               className={styles.ftDevLink}
               onClick={() => trackLinkClick().catch(console.error)}
             >
-              Desarrollado por Héctor Cobeña
+              Creador de contenido con IA
             </a>
           </div>
         </div>

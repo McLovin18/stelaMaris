@@ -130,7 +130,12 @@ export default function AdminInventario() {
     });
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950" style={{ color: "#000000" }}>
+      <style>{`
+        .text-slate-900, .text-slate-800, .text-slate-700, .text-slate-600, .text-slate-500, .text-slate-400 { color: #000000 !important; }
+        .border-slate-200, .border-slate-300, .border-slate-400, .border-slate-700 { border-color: #000000 !important; }
+        .bg-slate-50 { background-color: #f5f5f5 !important; }
+      `}</style>
       <div className="flex-1 w-full py-6 sm:py-15 px-4 pt-4 pb-24">
 
         {/* NAV ADMIN */}
@@ -139,7 +144,7 @@ export default function AdminInventario() {
             className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${
               vista === "productos"
                 ? "bg-purple-700 text-white border-purple-700"
-                : "bg-white text-purple-700 border-purple-700"
+                : "bg-white text-black border-black"
             }`}
             onClick={() => setVista("productos")}
           >
@@ -150,7 +155,7 @@ export default function AdminInventario() {
             className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${
               vista === "variaciones"
                 ? "bg-indigo-700 text-white border-indigo-700"
-                : "bg-white text-indigo-700 border-indigo-700"
+                : "bg-white text-black border-black"
             }`}
             onClick={() => setVista("variaciones")}
           >
@@ -161,7 +166,7 @@ export default function AdminInventario() {
             className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${
               vista === "marcas"
                 ? "bg-green-700 text-white border-green-700"
-                : "bg-white text-green-700 border-green-700"
+                : "bg-white text-black border-black"
             }`}
             onClick={() => setVista("marcas")}
           >
@@ -172,7 +177,7 @@ export default function AdminInventario() {
             className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${
               vista === "categorias"
                 ? "bg-blue-700 text-white border-blue-700"
-                : "bg-white text-blue-700 border-blue-700"
+                : "bg-white text-black border-black"
             }`}
             onClick={() => setVista("categorias")}
           >
@@ -183,7 +188,7 @@ export default function AdminInventario() {
             className={`flex-1 py-3 rounded-xl font-bold border-2 transition-all ${
               vista === "bodegas"
                 ? "bg-red-700 text-white border-red-700"
-                : "bg-white text-red-700 border-red-700"
+                : "bg-white text-black border-black"
             }`}
             onClick={() => setVista("bodegas")}
           >
@@ -195,7 +200,7 @@ export default function AdminInventario() {
         {vista === "productos" && (
           <>
             {/* RESUMEN */}
-            <div className="flex gap-8 items-center mb-4 text-base text-slate-700 dark:text-slate-200">
+            <div className="flex gap-8 items-center mb-4 text-base" style={{ color: "#000000" }}>
               <div>Total: <b>{resumen.total}</b></div>
               <div>Stock: <b>{resumen.conStock}</b></div>
               <div>Poco: <b>{resumen.pocoStock}</b></div>
@@ -209,7 +214,7 @@ export default function AdminInventario() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
                   filtroStock === "todos"
                     ? "bg-slate-700 text-white border-slate-700"
-                    : "bg-white text-slate-700 border-slate-400 hover:bg-slate-100"
+                    : "bg-white text-black border-black hover:bg-slate-100"
                 }`}
               >
                 Todos ({resumen.total})
@@ -219,7 +224,7 @@ export default function AdminInventario() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
                   filtroStock === "con-stock"
                     ? "bg-green-600 text-white border-green-600"
-                    : "bg-white text-green-700 border-green-500 hover:bg-green-50"
+                    : "bg-white text-black border-black hover:bg-green-50"
                 }`}
               >
                 Con stock ({resumen.conStock})
@@ -229,7 +234,7 @@ export default function AdminInventario() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
                   filtroStock === "poco-stock"
                     ? "bg-amber-500 text-white border-amber-500"
-                    : "bg-white text-amber-700 border-amber-500 hover:bg-amber-50"
+                    : "bg-white text-black border-black hover:bg-amber-50"
                 }`}
               >
                 Poco stock ({resumen.pocoStock})
@@ -239,7 +244,7 @@ export default function AdminInventario() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
                   filtroStock === "sin-stock"
                     ? "bg-red-600 text-white border-red-600"
-                    : "bg-white text-red-700 border-red-500 hover:bg-red-50"
+                    : "bg-white text-black border-black hover:bg-red-50"
                 }`}
               >
                 Sin stock ({resumen.sinStock})
@@ -306,7 +311,7 @@ export default function AdminInventario() {
             />
 
             {/* LISTA DE PRODUCTOS (estilo inventario) */}
-            <div className="bg-white rounded-2xl shadow border overflow-hidden">
+            <div className="bg-white rounded-2xl shadow border overflow-hidden" style={{ borderColor: "#000000" }}>
               <div className="max-h-[65vh] overflow-auto">
                 {loading ? (
                   <div className="p-6 text-center">Cargando productos...</div>
@@ -314,7 +319,7 @@ export default function AdminInventario() {
                   <div className="p-6 text-center">No hay productos</div>
                 ) : (
                   <table className="w-full min-w-245 table-fixed">
-                    <thead className="bg-slate-50 text-slate-700 border-b">
+                    <thead className="bg-slate-50 text-slate-700 border-b" style={{ borderColor: "#000000" }}>
                       <tr>
                         <th className="text-left font-semibold px-6 py-4 w-[48%]">Producto</th>
                         <th className="text-left font-semibold px-4 py-4 w-[24%]">Fecha actualización</th>
@@ -330,24 +335,24 @@ export default function AdminInventario() {
                         const stockTotal = getStockTotal(p);
 
                         return (
-                          <tr key={p.id} className="border-b last:border-b-0 hover:bg-slate-50/60 transition-colors align-middle">
+                          <tr key={p.id} className="border-b last:border-b-0 hover:bg-slate-50/60 transition-colors align-middle" style={{ borderColor: "#000000" }}>
                             <td className="px-6 py-3">
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-12 h-12 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center shrink-0 border border-slate-200">
+                                <div className="w-12 h-12 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center shrink-0 border" style={{ borderColor: "#000000" }}>
                                   <img src={thumb} alt={p.nombre} className="object-contain w-full h-full" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="font-semibold text-slate-800 truncate">{p.nombre}</div>
-                                  <div className="text-xs text-slate-500 truncate">SKU: {p.sku || p.id}</div>
+                                  <div className="font-semibold truncate" style={{ color: "#000000" }}>{p.nombre}</div>
+                                  <div className="text-xs truncate" style={{ color: "#666666" }}>SKU: {p.sku || p.id}</div>
                                   <div className="mt-1 flex items-center gap-2 text-xs whitespace-nowrap">
                                     <button className="text-rose-600 font-medium" onClick={() => { setEditData(p); setShowForm(true); }}>Editar</button>
-                                    <span className="text-slate-300">|</span>
-                                    <button className="text-slate-600 hover:text-slate-900" onClick={async () => { if (confirm("¿Eliminar producto?")) { await eliminarProducto(p.id); const prods = await obtenerProductos({ incluirSinStock: true }); setProductos(prods); } }}>Eliminar</button>
+                                    <span style={{ color: "#000000" }}>|</span>
+                                    <button style={{ color: "#000000" }} onClick={async () => { if (confirm("¿Eliminar producto?")) { await eliminarProducto(p.id); const prods = await obtenerProductos({ incluirSinStock: true }); setProductos(prods); } }}>Eliminar</button>
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-slate-800 whitespace-nowrap">{fecha}</td>
+                            <td className="px-4 py-3 whitespace-nowrap" style={{ color: "#000000" }}>{fecha}</td>
                             <td className="px-4 py-3 text-center">
                               <label className="inline-flex items-center justify-center">
                                 <input

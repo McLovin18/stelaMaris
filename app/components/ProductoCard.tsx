@@ -50,7 +50,7 @@ const cardStyles = `
     width: 100%;
     /* aspect-ratio cuadrado en mobile, más alto en desktop */
     aspect-ratio: 1 / 1;
-    background: var(--galleryImgBg);
+    background: #FFF0F4 !important;
     overflow: hidden;
     flex-shrink: 0;
   }
@@ -77,8 +77,8 @@ const cardStyles = `
     top: 10px;
     left: 10px;
     z-index: 10;
-    background: var(--secondary);
-    color: var(--secondaryForeground);
+    background: #BD1C33;
+    color: #FFFFFF;
     font-family: 'Barlow', sans-serif;
     font-size: 10px;
     font-weight: 700;
@@ -135,8 +135,8 @@ const cardStyles = `
   .pc-fav.is-fav {
     opacity: 1;
     transform: scale(1);
-    background: var(--secondary);
-    color: var(--secondaryForeground);
+    background: #BD1C33;
+    color: #FFFFFF;
   }
 
   .pc-card:hover .pc-fav {
@@ -146,8 +146,8 @@ const cardStyles = `
 
   /* ── barra info inferior — estilo imagen: negro total ── */
   .pc-info {
-    background: var(--primary);
-    color: var(--primaryForeground);
+    background: #CF1F6A;
+    color: #FFFFFF;
     padding: 10px 12px 12px;
     display: flex;
     flex-direction: column;
@@ -265,8 +265,8 @@ const cardStyles = `
   }
 
   .pc-btn-cart.in-cart {
-    border-color: var(--secondary);
-    color: var(--secondary);
+    border-color: var(--button);
+    color: var(--button);
   }
 
   .pc-btn-eye {
@@ -432,6 +432,7 @@ function ProductoCard({
               style={{
                 opacity: 0,
                 transition: "opacity 0.4s ease",
+                backgroundColor: "#FFF0F4 !important",
               }}
               onLoad={(e) => {
                 (e.currentTarget as HTMLImageElement).style.opacity = "1";

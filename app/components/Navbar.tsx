@@ -15,7 +15,7 @@ import { useUser } from "../context/UserContext";
 import { productMatches } from "../lib/search-utils";
 
 // ─────────────────────────────────────────────
-// Paleta de marca — Tienda Virtual
+// Paleta de marca — Tienda Virtual (Rosa/Coral)
 // ─────────────────────────────────────────────
 const BRAND = {
   bg: "var(--primary)",
@@ -24,8 +24,8 @@ const BRAND = {
   goldBright: "var(--secondaryHover)",
   border: "var(--border)",
   borderSoft: "color-mix(in srgb, var(--border) 70%, transparent)",
-  white: "var(--primaryForeground)",
-  textMuted: "color-mix(in srgb, var(--primaryForeground) 80%, transparent)",
+  white: "var(--text)",
+  textMuted: "color-mix(in srgb, var(--text) 80%, transparent)",
 };
 
 // ─────────────────────────────────────────────
@@ -310,7 +310,7 @@ export const Navbar = () => {
                 className="font-heading whitespace-nowrap text-xl sm:text-2xl"
                 style={{ letterSpacing: "0.12em", color: BRAND.white }}
               >
-                JULIANA <span style={{ color: BRAND.gold }}>BASICS</span>
+                STELA MARIS <span style={{ color: BRAND.gold }}></span>
               </span>
             </a>
           </div>
@@ -626,7 +626,7 @@ export const Navbar = () => {
                 className="font-bold text-base"
                 style={{ color: BRAND.white, letterSpacing: "0.08em" }}
               >
-                JULIANA <span style={{ color: BRAND.gold }}>BASICS</span>
+                STELA MARIS <span style={{ color: BRAND.gold }}></span>
               </span>
               <button
                 onClick={() => setMobileOpen(false)}

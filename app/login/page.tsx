@@ -126,13 +126,13 @@ export default function LoginPage() {
 
       {/* Hero header */}
       <div className="w-full max-w-md mx-auto px-4 pt-10 pb-4 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500 mb-5 shadow-lg shadow-blue-500/30">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#BD1C33] mb-5 shadow-lg shadow-[#BD1C33]/30">
           <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-white">
-          Juliana Basics
+          Stella Maris 👛
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-base">
           Acceso exclusivo para administración.
@@ -217,7 +217,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading || (rateLimitBlockedUntil !== null && rateLimitSecondsRemaining > 0)}
-                className="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+                className="w-full bg-[#BD1C33] hover:bg-[#8f1526] active:bg-[#8f1526] text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
               >
                 {loading ? (
                   <>

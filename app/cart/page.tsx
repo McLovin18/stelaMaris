@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { obtenerBodegas } from "../lib/bodegas-db";
 import { getSnapshotPricing } from "../lib/pricing";
@@ -172,7 +171,7 @@ export default function CartPage() {
       </div>
       <a
         href="/products-by-category"
-        className="mt-2 inline-flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] text-[var(--text)] hover:border-[var(--primary)] hover:shadow-md font-semibold px-6 py-2.5 rounded-xl transition-colors shadow"
+        className="mt-2 inline-flex items-center gap-2 bg-[var(--color-button)] border border-[var(--color-button)] text-white hover:bg-[var(--color-button-dark)] hover:shadow-md font-semibold px-6 py-2.5 rounded-xl transition-colors shadow"
       >
         <span className="material-icons-round text-base">storefront</span>
         Ver productos
@@ -336,7 +335,7 @@ export default function CartPage() {
                   <div>
                     <button
                       onClick={handleGenerarOrden}
-                      className="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-[var(--primary)] hover:bg-[var(--primaryHover)] text-[var(--primaryForeground)] font-extrabold text-sm rounded-xl transition-colors shadow-md"
+                      className="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-[var(--color-button)] hover:bg-[var(--color-button-dark)] text-[var(--text)] font-extrabold text-sm rounded-xl transition-colors shadow-md"
                       title="Enviar pedido por WhatsApp"
                     >
                       <span className="material-icons-round text-base">chat</span>

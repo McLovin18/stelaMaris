@@ -44,10 +44,16 @@ export async function saveBlog(data: Partial<Blog> & { id?: string }): Promise<B
   if (data.id) {
     const { id, ...rest } = data;
     const ref = doc(db, COLLECTION, id);
-    await updateDoc(ref, {
-      ...rest,
+    // Filtrar campos undefined para evitar el error de Firebase
+    const updateData: any = {
+      title: data.title || "",
+      description: data.description || "",
+      blocks: data.blocks || [],
+      featured: data.featured || false,
+      status: data.status || "draft",
       updatedAt: now,
-    } as any);
+    };
+    await updateDoc(ref, updateData);
     const updated = await getDoc(ref);
     return { id, ...(updated.data() as any) } as Blog;
   }

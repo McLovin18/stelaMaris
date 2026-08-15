@@ -15,8 +15,8 @@ import { Source_Serif_4 } from "next/font/google";
 // Optimiza regeneración de página principal y otros contenidos estáticos
 export const revalidate = 1800;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://julianabasics.com";
-const SITE_NAME = "Juliana Basics";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://stellamaris.straw";
+const SITE_NAME = "Stella Maris 👛 by Gabriela Cárdenas";
 const sourceSerif4 = Source_Serif_4({
   subsets: ["latin"],
   weight: ["400"],
@@ -26,22 +26,24 @@ const sourceSerif4 = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: {
-    default: "Juliana Basics - Moda & Outfits",
-    template: "%s | Juliana Basics",
+    default: "Stella Maris 👛 - Carteras de Paja Coquilla",
+    template: "%s | Stella Maris 👛 by Gabriela Cárdenas",
   },
   description:
-    "Tienda de moda y outfits. Descubre las últimas tendencias en ropa y accesorios, con piezas pensadas para cada estilo. Envíos a todo Ecuador.",
+    "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Descubre nuestras hermosas carteras de paja coquilla hechas a mano con amor.",
   keywords: [
-    "moda",
-    "outfits",
-    "ropa",
-    "tienda de ropa Ecuador",
-    "tendencias moda",
+    "carteras de paja coquilla",
+    "paja coquilla",
+    "carteras ecuatorianas",
+    "artesanías ecuatorianas",
+    "Stella Maris",
+    "Gabriela Cárdenas",
+    "carteras hechas a mano",
+    "moda ecuatoriana",
     "accesorios",
-    "estilo",
-    "Juliana Basics",
+    "paja toquilla",
   ],
-  creator: "Juliana Basics",
+  creator: "Stella Maris 👛 by Gabriela Cárdenas",
   metadataBase: new URL(SITE_URL),
   icons: {
     icon: "/favicon.ico",
@@ -56,15 +58,15 @@ export const metadata: Metadata = {
     locale: "es_ES",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: "Juliana Basics - Moda & Outfits",
+    title: "Stella Maris 👛 - Carteras de Paja Coquilla",
     description:
-      "Descubre las últimas tendencias en ropa y accesorios. Piezas pensadas para cada estilo, con envíos a todo Ecuador.",
+      "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Descubre nuestras hermosas carteras de paja coquilla hechas a mano con amor.",
     images: [
       {
         url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: "Juliana Basics - Moda & Outfits",
+        alt: "Stella Maris 👛 - Carteras de Paja Coquilla",
         type: "image/jpeg",
       },
     ],
@@ -73,9 +75,9 @@ export const metadata: Metadata = {
   // Twitter Card
   twitter: {
     card: "summary_large_image",
-    title: "Juliana Basics - Moda & Outfits",
+    title: "Stella Maris 👛 - Carteras de Paja Coquilla",
     description:
-      "Descubre las últimas tendencias en ropa y accesorios. Envíos a todo Ecuador.",
+      "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Carteras de paja coquilla hechas a mano.",
     images: [`${SITE_URL}/twitter-image.jpg`],
   },
 

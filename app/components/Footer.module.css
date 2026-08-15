@@ -12,7 +12,7 @@
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -23,7 +23,7 @@
   width: 320px;
   height: 320px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -78,7 +78,7 @@
   font-weight: var(--font-heading-weight);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--secondary);
+  color: #ffffff;
   margin-bottom: 18px;
   display: block;
 }
@@ -113,13 +113,13 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--secondaryHover);
+  background: #ffffff;
   flex-shrink: 0;
   transition: background 0.18s;
 }
 
 .ftLinks a:hover .ftDot {
-  background: var(--secondary);
+  background: #ffffff;
 }
 
 .ftContactItem {
@@ -136,7 +136,7 @@
   font-weight: var(--font-heading-weight);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--secondary);
+  color: #ffffff;
 }
 
 .ftContactVal {
@@ -307,7 +307,7 @@ a.ftContactVal:hover {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--secondary);
+  background: #ffffff;
   flex-shrink: 0;
 }
 

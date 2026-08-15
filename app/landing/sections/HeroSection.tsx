@@ -8,36 +8,7 @@ import type {
 } from "../../lib/landing-types";
 
 // ── Hook ────────────────────────────────────────────────────────────────────
-function useGoogleMapsPlaceDetails(placeId?: string, enabled?: boolean) {
-  const [data, setData] = React.useState<{
-    rating?: number;
-    user_ratings_total?: number;
-  } | null>(null);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (!enabled || !placeId) return;
-    setLoading(true);
-    setError(null);
-    fetch(`/api/google-maps?place_id=${placeId}`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (
-          typeof json.rating !== "undefined" &&
-          typeof json.ratingCount !== "undefined"
-        ) {
-          setData({ rating: json.rating, user_ratings_total: json.ratingCount });
-        } else {
-          setError(json.error || "No se pudo obtener la información de Google Maps");
-        }
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [placeId, enabled]);
-
-  return { data, loading, error };
-}
+// Eliminado hook personalizado para evitar problemas con hooks
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 type HeroItem = {
@@ -47,9 +18,6 @@ type HeroItem = {
   buttonText?: string;
   buttonLink?: string;
   image?: string | null;
-  googleMaps?: boolean;
-  rating?: number;
-  ratingCount?: number;
   generalMessage?: string;
   fieldStyles?: Record<string, LandingFieldStyle>;
   fieldPositions?: Record<string, { desktop?: FieldPosition; mobile?: FieldPosition }>;
@@ -63,9 +31,6 @@ export type HeroSectionProps = {
   subtitleMobileFontSize?: string | number;
   badgeMobileFontSize?: string | number;
   buttonTextMobileFontSize?: string | number;
-  googleMaps?: boolean;
-  rating?: number;
-  ratingCount?: number;
   generalMessage?: string;
   buttonText?: string;
   buttonLink?: string;
@@ -77,41 +42,6 @@ export type HeroSectionProps = {
   // When provided by an editor/preview, forces rendering for that device
   device?: "desktop" | "mobile";
 };
-
-// ── Componente de estrellas ──────────────────────────────────────────────────
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: 5 }).map((_, idx) => {
-        const fill = Math.max(0, Math.min(1, rating - idx));
-        return (
-          <span key={idx} className="relative inline-block w-5 h-5">
-            <svg width="20" height="20" viewBox="0 0 24 24">
-              <defs>
-                <linearGradient
-                  id={`sg-${idx}-${rating}`}
-                  x1="0"
-                  y1="0"
-                  x2="1"
-                  y2="0"
-                >
-                  <stop offset={`${fill * 100}%`} stopColor="#FACC15" />
-                  <stop offset={`${fill * 100}%`} stopColor="rgba(255,255,255,0.3)" />
-                </linearGradient>
-              </defs>
-              <polygon
-                points="12,2 15,9 22,9 17,14 18,21 12,17 6,21 7,14 2,9 9,9"
-                fill={`url(#sg-${idx}-${rating})`}
-                stroke="#FACC15"
-                strokeWidth="0.8"
-              />
-            </svg>
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 // ── Componente principal ─────────────────────────────────────────────────────
 export default function HeroSection({
@@ -129,11 +59,42 @@ export default function HeroSection({
   fieldStyles,
   fieldPositions,
   items,
-  googleMaps,
   generalMessage,
   device,
 }: HeroSectionProps) {
   
+  // ── TODOS los hooks primero ────────────────────────────────────────────────
+  const [screenType, setScreenType] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [isDesktop, setIsDesktop] = React.useState<boolean>(() => {
+    return typeof window !== "undefined" ? window.innerWidth >= 768 : true;
+  });
+
+  // ── Todos los useEffect ─────────────────────────────────────────────────────
+  // Device detection
+  React.useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768); // md breakpoint
+    checkDesktop();
+    window.addEventListener("resize", checkDesktop);
+    return () => window.removeEventListener("resize", checkDesktop);
+  }, []);
+
+  // Screen type detection
+  React.useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+
+      if (w < 640) setScreenType("mobile");
+      else if (w < 1024) setScreenType("tablet");
+      else setScreenType("desktop");
+    };
+
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // ── Luego el resto de lógica ────────────────────────────────────────────────
   const bg = styles?.backgroundColor;
   const color = styles?.textColor;
   const textAlign: React.CSSProperties["textAlign"] = styles?.textAlign || "center";
@@ -172,44 +133,10 @@ export default function HeroSection({
     return style;
   };
 
-  // ── Device detection: prefer explicit `device` prop from editor/preview when provided
-  const [isDesktop, setIsDesktop] = React.useState<boolean>(() => {
-    if (typeof device !== "undefined") return device === "desktop";
-    return typeof window !== "undefined" ? window.innerWidth >= 768 : true;
-  });
-
-  React.useEffect(() => {
-    if (typeof device !== "undefined") {
-      setIsDesktop(device === "desktop");
-      return;
-    }
-
-    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768); // md breakpoint
-    checkDesktop();
-    window.addEventListener("resize", checkDesktop);
-    return () => window.removeEventListener("resize", checkDesktop);
-  }, [device]);
-
-  const placeId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_PLACE_ID;
-  const hasGoogleMaps =
-    googleMaps || (items && items.some((i) => i.googleMaps));
-  const { data: googleMapsData } = useGoogleMapsPlaceDetails(placeId, hasGoogleMaps);
-
-  // ── TODOS los hooks antes de cualquier return condicional ────────────────
-  const [currentIndex, setCurrentIndex] = React.useState(0);
-
   const heroItems: HeroItem[] = React.useMemo(() => {
     return (
       items && items.length
-        ? items.map((item) =>
-            item.googleMaps && googleMapsData
-              ? {
-                  ...item,
-                  rating: googleMapsData.rating,
-                  ratingCount: googleMapsData.user_ratings_total,
-                }
-              : item
-          )
+        ? items.map((item) => item)
         : [
             {
               title,
@@ -218,14 +145,11 @@ export default function HeroSection({
               buttonText,
               buttonLink,
               image,
-              googleMaps,
-              rating: googleMapsData?.rating,
-              ratingCount: googleMapsData?.user_ratings_total,
               generalMessage,
             },
           ]
     ).filter((h) => h && (h.title || h.subtitle || h.image));
-  }, [items, googleMapsData, title, subtitle, badge, buttonText, buttonLink, image, googleMaps, generalMessage]);
+  }, [items, title, subtitle, badge, buttonText, buttonLink, image, generalMessage]);
 
   // debug logs removed
 
@@ -241,31 +165,31 @@ export default function HeroSection({
 
   // Autoplay
   React.useEffect(() => {
-    if (heroItems.length <= 1) return;
-    const id = setInterval(goToNext, 5000);
-    return () => clearInterval(id);
+    const intervalId = heroItems.length > 1 ? setInterval(goToNext, 5000) : undefined;
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [heroItems.length, goToNext]);
 
   // Precargar la siguiente imagen en paralelo para transición suave sin parpadeo
   React.useEffect(() => {
-    if (heroItems.length <= 1) return;
-    
-    // Precargar la siguiente imagen
-    const nextIndex = (currentIndex + 1) % heroItems.length;
-    const nextImage = heroItems[nextIndex]?.image;
-    
-    if (nextImage) {
-      const img = new window.Image();
-      img.src = nextImage;
+    if (heroItems.length > 1) {
+      // Precargar la siguiente imagen
+      const nextIndex = (currentIndex + 1) % heroItems.length;
+      const nextImage = heroItems[nextIndex]?.image;
+      
+      if (nextImage) {
+        const img = new window.Image();
+        img.src = nextImage;
+      }
     }
+    return () => {};
   }, [currentIndex, heroItems]);
 
-  // ── Return condicional DESPUÉS de todos los hooks ────────────────────────
-  if (!heroItems.length) return null;
-
-  const current = heroItems[Math.min(currentIndex, heroItems.length - 1)];
-  const currentFieldStyles = current.fieldStyles || {};
-  const currentFieldPositions = current.fieldPositions || fieldPositions || {};
+  // ── Current item ───────────────────────────────────────────────────────────
+  const current = heroItems.length > 0 ? heroItems[Math.min(currentIndex, heroItems.length - 1)] : null;
+  const currentFieldStyles = current?.fieldStyles || {};
+  const currentFieldPositions = current?.fieldPositions || fieldPositions || {};
 
   // debug logs removed
 
@@ -345,25 +269,6 @@ export default function HeroSection({
     textAlign,
   };
 
-
-  const [screenType, setScreenType] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
-
-
-
-React.useEffect(() => {
-  const update = () => {
-    const w = window.innerWidth;
-
-    if (w < 640) setScreenType("mobile");
-    else if (w < 1024) setScreenType("tablet");
-    else setScreenType("desktop");
-  };
-
-  update();
-  window.addEventListener("resize", update);
-  return () => window.removeEventListener("resize", update);
-}, []);
-
 const innerStyle: React.CSSProperties = {
   aspectRatio:
     screenType === "mobile"
@@ -381,52 +286,29 @@ const innerStyle: React.CSSProperties = {
         className="relative overflow-hidden w-full max-w-full min-h-0"
         style={{
           ...innerStyle,
-          backgroundImage: `url(${current.image})`,
+          backgroundImage: current?.image ? `url(${current.image})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        <img
-          src={current.image}
-          alt={current.title || "Hero"}
-          width={1920}
-          height={840}
-          loading="eager"
-          decoding="async"
-          className="w-full h-full object-cover block"
-          style={{display: "block" }}
-          draggable={false}
-        />
-
-        {/* Badge de Google Maps */}
-        {current.googleMaps && (current.rating || current.ratingCount) && (
-          <div className="absolute top-3 left-3 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg flex flex-col gap-1 max-w-[180px] sm:max-w-none">
-            <div className="flex items-center gap-1.5">
-              <svg width="16" height="16" viewBox="0 0 24 24" className="flex-shrink-0">
-                <path
-                  fill="#4285F4"
-                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"
-                />
-              </svg>
-              <span className="text-xs font-bold text-slate-700 dark:text-white">Google</span>
-              <span className="text-xs font-extrabold text-yellow-500">
-                {current.rating?.toFixed(1)}
-              </span>
-            </div>
-            <StarRating rating={current.rating ?? 0} />
-            <span className="text-[10px] text-slate-500 dark:text-slate-400">
-              {current.ratingCount?.toLocaleString()} reseñas
-            </span>
-            {current.generalMessage && (
-              <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-tight">
-                {current.generalMessage}
-              </p>
-            )}
-          </div>
+        {current?.image && (
+          <img
+            src={current.image}
+            alt={current.title || "Hero"}
+            width={1920}
+            height={840}
+            loading="eager"
+            decoding="async"
+            className="w-full h-full object-cover block"
+            style={{display: "block" }}
+            draggable={false}
+          />
         )}
 
+
+
         {/* Elementos posicionados personalizados (solo si tienen positioning) */}
-        {fieldPositions?.badge && current.badge && (
+        {fieldPositions?.badge && current?.badge && (
           <span
             className="absolute inline-block px-2 py-0.5 text-[6px] sm:px-3 sm:py-1 sm:text-xs font-bold tracking-widest uppercase bg-white/90 text-black dark:bg-slate-900/90 dark:text-white rounded-full shadow"
             style={{
@@ -438,7 +320,7 @@ const innerStyle: React.CSSProperties = {
           </span>
         )}
 
-        {fieldPositions?.title && current.title && (
+        {fieldPositions?.title && current?.title && (
           <h2
             className="absolute text-xl sm:text-5xl lg:text-5xl font-extrabold text-white leading-tight drop-shadow-lg"
             style={{
@@ -451,7 +333,7 @@ const innerStyle: React.CSSProperties = {
           </h2>
         )}
 
-        {fieldPositions?.subtitle && current.subtitle && (
+        {fieldPositions?.subtitle && current?.subtitle && (
           <p
             className="absolute text-white/80 text-[9px] sm:text-sm drop-shadow"
             style={{
@@ -464,7 +346,7 @@ const innerStyle: React.CSSProperties = {
           </p>
         )}
 
-        {fieldPositions?.buttonText && current.buttonText && (
+        {fieldPositions?.buttonText && current?.buttonText && (
           <a
             href={current.buttonLink || "/products-by-category"}
             className="absolute inline-flex items-center gap-1 sm:gap-2 bg-white/95 hover:bg-white text-black font-bold text-[9px] sm:text-2xl px- py-1.5 sm:px-1 sm:py-4 rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
@@ -504,7 +386,7 @@ const innerStyle: React.CSSProperties = {
         {!fieldPositions?.badge && !fieldPositions?.title && !fieldPositions?.subtitle && (
           <div className="absolute left-0 right-0 bottom-7 z-20 flex flex-col items-start text-left gap-0 sm:gap-0 pb-1 px-2 sm:pb-4 sm:px-8 w-full max-w-full">
             <div className="absolute sm:bottom-50 bottom-15">
-                {current.badge && (
+                {current?.badge && (
                   <span
                     className="inline-block px-2 py-0.5 text-[6px] sm:px-3 sm:py-1 sm:text-xs font-bold tracking-widest uppercase bg-white/90 text-black dark:bg-slate-900/90 dark:text-white rounded-full shadow"
                     style={{ ...defaultBadgeInlineStyle, ...badgeStyle }}
@@ -512,7 +394,7 @@ const innerStyle: React.CSSProperties = {
                     {current.badge}
                   </span>
                 )}
-                {current.title && (
+                {current?.title && (
                   <h2
                     className="text-xl sm:text-5xl lg:text-5xl font-extrabold text-white leading-tight max-w-[90vw] sm:max-w-2xl drop-shadow-lg"
                     style={{ ...defaultTitleInlineStyle, ...titleStyle }}
@@ -520,7 +402,7 @@ const innerStyle: React.CSSProperties = {
                     {current.title}
                   </h2>
                 )}
-                {current.subtitle && (
+                {current?.subtitle && (
                   <p
                     className="text-white/80 text-[9px] sm:text-sm max-w-[90vw] sm:max-w-2xl drop-shadow"
                     style={{ ...defaultSubtitleInlineStyle, ...subtitleStyle }}
@@ -530,7 +412,7 @@ const innerStyle: React.CSSProperties = {
                 )}
             </div>
 
-            {current.buttonText && (
+            {current?.buttonText && (
               <div className="w-full flex justify-center sm:py-3 pb-5">
                 <a
                   href={current.buttonLink || "/products-by-category"}

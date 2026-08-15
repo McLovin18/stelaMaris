@@ -100,6 +100,12 @@ async function compressImageFile(file: File, maxDimension = 1600, quality = 0.82
     canvas.height = targetHeight;
     const ctx = canvas.getContext("2d");
     if (!ctx) return file;
+    
+    // Llenar el canvas con el color de fondo de la página antes de dibujar la imagen
+    // Esto evita que las áreas transparentes se vuelvan negras al convertir a JPEG
+    ctx.fillStyle = "#FFF0F4";
+    ctx.fillRect(0, 0, targetWidth, targetHeight);
+    
     ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
     bitmap.close?.();
 
@@ -603,12 +609,14 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
                 >
                   {/* Preview de imagen */}
                   {url && (url.startsWith("http") || url.startsWith("blob:")) ? (
-                    <img
-                      src={url}
-                      alt={`foto-${idx}`}
-                      loading="lazy"
-                      className="w-full aspect-square object-cover rounded-xl"
-                    />
+                    <div className="w-full aspect-square rounded-xl bg-white overflow-hidden">
+                      <img
+                        src={url}
+                        alt={`foto-${idx}`}
+                        loading="lazy"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
                   ) : (
                     <div className="w-full aspect-square rounded-xl bg-slate-100 flex items-center justify-center">
                       <span className="material-icons-round text-3xl text-slate-300">image_not_supported</span>

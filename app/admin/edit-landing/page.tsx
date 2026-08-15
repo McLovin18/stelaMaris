@@ -1189,7 +1189,12 @@ export default function LandingEditor() {
     return <div className="p-8 text-center flex flex-col items-center justify-center"><Loading3DIcon /><span className="mt-4 text-slate-400 dark:text-white/30 text-sm">Cargando landing...</span></div>;
 
   return (
-    <div className="min-h-screen py-6 sm:py-12 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-6">
+    <div className="min-h-screen py-6 sm:py-12 bg-white dark:bg-slate-950 px-6" style={{ color: "#000000" }}>
+      <style>{`
+        .text-slate-900, .text-slate-800, .text-slate-700, .text-slate-600, .text-slate-500, .text-slate-400 { color: #000000 !important; }
+        .border-slate-200, .border-slate-300, .border-slate-400, .border-slate-700 { border-color: #000000 !important; }
+        .bg-slate-50 { background-color: #f5f5f5 !important; }
+      `}</style>
       <h1 className="text-2xl font-bold mb-6">Editor de Landing</h1>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
@@ -1213,14 +1218,16 @@ export default function LandingEditor() {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-4 mb-4 rounded shadow border border-slate-200 dark:border-slate-700"
+                          className="bg-white dark:bg-slate-900 p-4 mb-4 rounded shadow border"
+                          style={{ color: "#000000", borderColor: "#000000" }}
                         >
                           <div className="flex items-start justify-between mb-3 gap-3">
                             <div className="flex items-center gap-2">
                               {/* Drag handle icon for section reordering */}
                               <span
                                 {...provided.dragHandleProps}
-                                className="material-icons-round cursor-move select-none text-slate-400 text-lg mr-2"
+                                className="material-icons-round cursor-move select-none text-lg mr-2"
+                                style={{ color: "#666666" }}
                                 title="Arrastrar para reordenar secci+�n"
                               >
                                 drag_indicator
@@ -1233,7 +1240,7 @@ export default function LandingEditor() {
                                   {/* Eliminado texto de medida recomendada arriba */}
                                 </h3>
                                 {section.hidden && (
-                                  <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                  <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full" style={{ backgroundColor: "#f0f0f0", color: "#000000" }}>
                                     <span className="material-icons-round text-[14px]">
                                       visibility_off
                                     </span>
@@ -1245,7 +1252,8 @@ export default function LandingEditor() {
                             <div className="flex items-center gap-2 text-[11px]">
                               <button
                                 type="button"
-                                className="px-2 py-1 rounded border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                                className="px-2 py-1 rounded border hover:bg-slate-50 flex items-center gap-1"
+                                style={{ borderColor: "#000000", color: "#000000" }}
                                 onClick={() => toggleSectionHidden(section.id)}
                               >
                                 <span className="material-icons-round text-[14px]">
@@ -1255,7 +1263,8 @@ export default function LandingEditor() {
                               </button>
                               <button
                                 type="button"
-                                className="px-2 py-1 rounded border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                                className="px-2 py-1 rounded border hover:bg-slate-50 flex items-center gap-1"
+                                style={{ borderColor: "#000000", color: "#000000" }}
                                 onClick={() => duplicateSection(idx)}
                               >
                                 <span className="material-icons-round text-[14px]">
@@ -1315,8 +1324,9 @@ export default function LandingEditor() {
                                 className={`px-2 py-1 rounded-full border text-xs ${
                                   currentTab === tab.id
                                     ? "bg-purple-600 text-white border-purple-600"
-                                    : "bg-slate-50 text-slate-600 border-slate-200"
+                                    : "bg-slate-50 border-black"
                                 }`}
+                                style={{ color: currentTab === tab.id ? "#FFFFFF" : "#000000" }}
                               >
                                 {tab.label}
                               </button>

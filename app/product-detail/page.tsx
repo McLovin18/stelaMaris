@@ -117,20 +117,21 @@ export default function ProductDetailPage({ params }) {
             
             // Intentar subsubcategoria primero
             if (prod.subsubcategoria) {
-              rel = await obtenerProductosPorSubsubcategoria(prod.subsubcategoria, prod.id, 10);
-              console.log("[RELACIONADOS] encontrados por subsubcategoria:", rel);
+              rel = await obtenerProductosPorSubsubcategoria(prod.subsubcategoria, prod.subcategoria, prod.categoria, prod.id);
+              console.log("[RELACIONADOS] producto actual ID:", prod.id, "encontrados por subsubcategoria:", rel);
             }
             
             // Fallback a subcategoria si no hay resultados
             if ((!rel || rel.length === 0) && prod.subcategoria) {
-              rel = await obtenerProductosPorSubcategoria(prod.subcategoria, prod.id, 10);
-              console.log("[RELACIONADOS] encontrados por subcategoria:", rel);
+              rel = await obtenerProductosPorSubcategoria(prod.subcategoria, prod.categoria, prod.id);
+              console.log("[RELACIONADOS] producto actual ID:", prod.id, "encontrados por subcategoria:", rel);
             }
             
             // Fallback a categoria si aún no hay resultados
             if ((!rel || rel.length === 0) && prod.categoria) {
-              rel = await obtenerProductosPorCategoria(prod.categoria, prod.id, 10);
-              console.log("[RELACIONADOS] encontrados por categoria:", rel);
+              rel = await obtenerProductosPorCategoria(prod.categoria);
+              rel = rel.filter(p => p.id !== prod.id);
+              console.log("[RELACIONADOS] producto actual ID:", prod.id, "encontrados por categoria:", rel);
             }
             
             setRelacionados(rel);
@@ -437,8 +438,8 @@ export default function ProductDetailPage({ params }) {
                     onClick={() => handleTabToggle("caracteristicas")}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all ${
                       activeTab === "caracteristicas"
-                            ? "bg-[var(--primary)] text-[var(--primaryForeground)]"
-                            : "bg-[var(--card)] text-[var(--text)] hover:bg-[var(--bgSecondary)]"
+                            ? "bg-[var(--color-button)] text-[var(--text)]"
+                            : "bg-[var(--card)] text-black hover:bg-[var(--bgSecondary)]"
                     }`}
                   >
                     <span className="material-icons-round text-[16px]">list_alt</span>
@@ -451,8 +452,8 @@ export default function ProductDetailPage({ params }) {
                     hasCaracteristicas ? "border-l border-slate-200 dark:border-white/[0.08]" : ""
                   } ${
                     activeTab === "resenas"
-                            ? "bg-[var(--primary)] text-[var(--primaryForeground)]"
-                            : "bg-[var(--card)] text-[var(--text)] hover:bg-[var(--bgSecondary)]"
+                            ? "bg-[var(--color-button)] text-[var(--text)]"
+                            : "bg-[var(--card)] text-black hover:bg-[var(--bgSecondary)]"
                   }`}
                 >
                   <span className="material-icons-round text-[16px]">star_outline</span>
@@ -660,8 +661,8 @@ export default function ProductDetailPage({ params }) {
                   maxCantidad === 0 || (hasVariations && variationAttributeIds.length > 0 && !variationAttributeIds.every(attrId => selectedVariations[attrId]))
                     ? "bg-white text-slate-300 border-slate-200 cursor-not-allowed opacity-50 shadow-none"
                     : inCart
-                      ? "bg-[var(--card)] text-[var(--text)] border-[var(--primary)] hover:border-[var(--primaryHover)] hover:shadow-md"
-                      : "bg-[var(--card)] text-[var(--text)] border-[var(--border)] hover:border-[var(--primary)] hover:shadow-md"
+                      ? "bg-[var(--color-button)] text-[var(--text)] border-[var(--color-button)] hover:bg-[var(--color-button-dark)] hover:shadow-md"
+                      : "bg-[var(--color-button)] text-[var(--text)] border-[var(--color-button)] hover:bg-[var(--color-button-dark)] hover:shadow-md"
                 }`}
               >
                 <span className="material-icons-round text-[18px]">
@@ -675,8 +676,8 @@ export default function ProductDetailPage({ params }) {
                   onClick={handleFav}
                   className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${
                     isFav
-                      ? "bg-red-500 text-white shadow"
-                      : "bg-[var(--card)] border border-[var(--border)] text-[var(--text)] hover:border-[var(--primary)] hover:text-[var(--primary)] hover:shadow-sm"
+                      ? "bg-[var(--color-button)] text-[var(--text)] shadow"
+                      : "bg-[var(--card)] border border-[var(--border)] text-[var(--text)] hover:border-[var(--color-button)] hover:text-[var(--color-button)] hover:shadow-sm"
                   }`}
                   title={isFav ? "Quitar de favoritos" : "Agregar a favoritos"}
                 >
@@ -755,7 +756,7 @@ export default function ProductDetailPage({ params }) {
                 onClick={() => handleTabToggle("caracteristicas")}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all ${
                   activeTab === "caracteristicas"
-                    ? "bg-black text-white"
+                    ? "bg-[var(--color-button)] text-[var(--text)]"
                     : "bg-white text-slate-600 hover:bg-slate-50"
                 }`}
               >
@@ -769,7 +770,7 @@ export default function ProductDetailPage({ params }) {
                 hasCaracteristicas ? "border-l border-slate-200 dark:border-white/[0.08]" : ""
               } ${
                 activeTab === "resenas"
-                  ? "bg-black text-white"
+                  ? "bg-[var(--color-button)] text-[var(--text)]"
                   : "bg-white text-slate-600 hover:bg-slate-50"
               }`}
             >

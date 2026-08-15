@@ -347,7 +347,12 @@ export default function AdminEditBlogsPage() {
 	const previewBlog = editingBlog ? toPreviewBlog(editingBlog) : null;
 
 	return (
-		<div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950">
+		<div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-950" style={{ color: "#000000" }}>
+			<style>{`
+				.text-slate-900, .text-slate-800, .text-slate-700, .text-slate-600, .text-slate-500, .text-slate-400 { color: #000000 !important; }
+				.border-slate-200, .border-slate-300, .border-slate-400, .border-slate-700 { border-color: #000000 !important; }
+				.bg-slate-50 { background-color: #f5f5f5 !important; }
+			`}</style>
 			<div className="flex-1 w-full py-6 sm:py-12 px-4 pt-4 pb-24">
 				<div className="flex flex-col gap-2 mb-4">
 					<h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
