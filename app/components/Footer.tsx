@@ -164,13 +164,13 @@ const Footer: React.FC = () => {
               Hecho en Ecuador
             </div>
             <a
-              href="https://www.instagram.com/stellamaris.straw/"
+              href="https://www.instagram.com/hector.cobena/"
               target="_blank"
               rel="noreferrer"
               className={styles.ftDevLink}
               onClick={() => trackLinkClick().catch(console.error)}
             >
-              Creador de contenido con IA
+              Desarrollado por Héctor Cobeña
             </a>
           </div>
         </div>
