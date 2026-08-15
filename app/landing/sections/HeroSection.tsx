@@ -384,8 +384,8 @@ const innerStyle: React.CSSProperties = {
 
         {/* Contenido textual por defecto (sin posicionamiento personalizado) */}
         {!fieldPositions?.badge && !fieldPositions?.title && !fieldPositions?.subtitle && (
-          <div className="absolute left-0 right-0 bottom-7 z-20 flex flex-col items-start text-left gap-0 sm:gap-0 pb-1 px-2 sm:pb-4 sm:px-8 w-full max-w-full">
-            <div className="absolute sm:bottom-50 bottom-15">
+          <div className="absolute left-0 right-0 top-0 z-20 flex flex-col items-start text-left gap-0 sm:gap-0 pt-2 px-2 sm:pt-4 sm:px-8 w-full max-w-full">
+            <div className="relative top-0">
                 {current?.badge && (
                   <span
                     className="inline-block px-2 py-0.5 text-[6px] sm:px-3 sm:py-1 sm:text-xs font-bold tracking-widest uppercase bg-white/90 text-black dark:bg-slate-900/90 dark:text-white rounded-full shadow"
@@ -411,18 +411,19 @@ const innerStyle: React.CSSProperties = {
                   </p>
                 )}
             </div>
+          </div>
+        )}
 
-            {current?.buttonText && (
-              <div className="w-full flex justify-center sm:py-3 pb-5">
-                <a
-                  href={current.buttonLink || "/products-by-category"}
-                  className="inline-flex items-centersm:gap-2 bg-white/95 hover:bg-white text-black font-bold text-[9px] sm:text-2xl px-3 py-1.5 sm:px-4 sm:py-3 rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
-                  style={{ ...defaultButtonInlineStyle, ...buttonTextStyle }}
-                >
-                  <span>{current.buttonText}</span>
-                </a>
-              </div>
-            )}
+        {/* Botón en posición inferior */}
+        {!fieldPositions?.buttonText && current?.buttonText && (
+          <div className="absolute left-0 right-0 bottom-0 sm:bottom-7 z-20 flex justify-center px-2 sm:px-8 pb-2 sm:pb-5">
+            <a
+              href={current.buttonLink || "/products-by-category"}
+              className="inline-flex items-center sm:gap-2 bg-white/95 hover:bg-white text-black font-bold text-[9px] sm:text-2xl px-3 py-1.5 sm:px-4 sm:py-3 rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
+              style={{ ...defaultButtonInlineStyle, ...buttonTextStyle }}
+            >
+              <span>{current.buttonText}</span>
+            </a>
           </div>
         )}
 

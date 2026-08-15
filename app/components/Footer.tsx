@@ -54,7 +54,7 @@ const Footer: React.FC = () => {
 
         {/* Main row */}
         <div className={styles.ftMain}>
-          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+          <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-8 items-center">
 
             {/* Columna 1: Información de la tienda */}
             <div className="flex flex-col items-center md:items-start text-center md:text-left gap-1">
@@ -89,7 +89,41 @@ const Footer: React.FC = () => {
               </ul>
             </div>
 
-            {/* Columna 3: Información de contacto */}
+            {/* Columna 3: Cosas de la marca */}
+            <div className="flex flex-col items-center md:items-start gap-2">
+              <span className="text-xs font-bold text-white mb-1">Información de Stella Maris</span>
+              <ul className="flex flex-col gap-1.5">
+                <li>
+                  <a
+                    href="/blogs/mdAXoWNRHP0Tk4MywpeA"
+                    className="text-xs text-white hover:text-white/80 transition-colors"
+                    onClick={() => trackLinkClick().catch(console.error)}
+                  >
+                    Historia
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/blogs/X0Rf1ZCsohI4StsJr521"
+                    className="text-xs text-white hover:text-white/80 transition-colors"
+                    onClick={() => trackLinkClick().catch(console.error)}
+                  >
+                    Filosofía
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/blogs/t5yqfmz8jFgoXuhegNhR"
+                    className="text-xs text-white hover:text-white/80 transition-colors"
+                    onClick={() => trackLinkClick().catch(console.error)}
+                  >
+                    Visibilidad
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Columna 4: Información de contacto */}
             <div className="flex flex-col items-center md:items-end gap-2.5">
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}`}
