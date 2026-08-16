@@ -8,6 +8,9 @@ import { useRouter } from "next/navigation";
 import { useTracking } from "../lib/useAnalytics";
 import { useToast } from "../context/ToastContext";
 import { getCatalogPricing } from "../lib/pricing";
+import { useLanguage } from "../context/LanguageContext";
+import { useProductTranslations } from "../hooks/useProductTranslations";
+import { useUITranslation } from "../hooks/useUITranslation";
 
 const cardStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Barlow:wght@400;500;600;700&display=swap');
@@ -326,6 +329,15 @@ function ProductoCard({
   const router = useRouter();
   const { trackProductClick } = useTracking();
   const { showToast } = useToast();
+  const { idiomaActual } = useLanguage();
+  const { t } = useUITranslation();
+  const { translations: productTranslations } = useProductTranslations(
+    producto.id,
+    idiomaActual?.codigo || "es"
+  );
+  
+  const languageCode = idiomaActual?.codigo || "es";
+  const productName = productTranslations.nombre || producto.nombre;
 
   const isFav = favoritos?.some((p) => p.id === producto.id);
   const inCart = carrito?.some((p) => p.id === producto.id);
@@ -404,7 +416,7 @@ function ProductoCard({
         precioUnitario: finalPrice,
         descuento: hasDiscount ? discount : 0,
       });
-      showToast(`${producto.nombre} añadido al carrito`, "success");
+      showToast(`${productTranslations.nombre || producto.nombre} ${t("product.added_to_cart")}`, "success");
     }
   };
 
@@ -425,7 +437,7 @@ function ProductoCard({
           <div className="pc-img-wrap">
             <Image
               src={producto.imagenes?.[0] || "/no-image.png"}
-              alt={producto.nombre}
+              alt={productName}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-contain"
@@ -469,7 +481,7 @@ function ProductoCard({
 
           {/* ── INFO BARRA NEGRA ── */}
           <div className="pc-info">
-            <p className="pc-name">{producto.nombre}</p>
+            <p className="pc-name">{productName}</p>
 
             <div className="pc-prices">
               {hasDiscount && (

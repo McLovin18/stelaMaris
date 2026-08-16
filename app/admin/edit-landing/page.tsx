@@ -25,6 +25,9 @@ import { SectionRenderer } from "../../landing/sectionRegistry";
 import { obtenerProductos } from "../../lib/productos-db";
 import ProductoCard from "../../components/ProductoCard";
 import DraggablePreviewEditor from "../components/DraggablePreviewEditor";
+import { TranslationEditor } from "../../components/TranslationEditor";
+import { obtenerTraduccionesPorContenido, crearTraduccion, actualizarTraduccion } from "../../lib/traducciones-db";
+import { useLanguage } from "../../context/LanguageContext";
 
 /* ============================
    TIPOS
@@ -98,6 +101,13 @@ export default function LandingEditor() {
   const [activeHeroItemFieldStyles, setActiveHeroItemFieldStyles] = useState<
     Record<string, { index: number; fieldName: string } | null>
   >({});
+  
+  // Sistema de traducciones para landing - versión simplificada
+  const { idiomasDisponibles } = useLanguage();
+  const [idiomaEdicion, setIdiomaEdicion] = useState<string>("es");
+  const [heroBase, setHeroBase] = useState<any>(null); // Hero base (español)
+  const [sectionsBase, setSectionsBase] = useState<Section[]>([]); // Secciones base (español)
+  const [forceReload, setForceReload] = useState<number>(0); // Forzar recarga de traducciones
   
   // Para drag & drop de items dentro de secciones
   const [draggedItemState, setDraggedItemState] = useState<{
@@ -266,7 +276,13 @@ export default function LandingEditor() {
           obtenerProductos(),
         ]);
 
-        setHero(landingData?.hero ?? null);
+        // El hero está en las secciones, no en el campo hero separado
+        const heroSection = landingData?.sections?.find((s: any) => s.type === "hero");
+        console.log("Hero section encontrada:", heroSection);
+        
+        // No usamos el campo hero separado, está en las secciones
+        setHero(null);
+        setHeroBase(null);
 
         // Guardamos todos los productos disponibles (inventario)
         setProductos(prods ?? []);
@@ -304,6 +320,9 @@ export default function LandingEditor() {
         const normalizedSections: Section[] = migrated.map((section) => {
           if (section.type !== "hero") return section;
 
+          console.log("Sección hero encontrada:", section);
+          console.log("Props de hero:", section.props);
+
           const rawItems = Array.isArray(section.props?.items) ? section.props.items : [];
           const firstItem = rawItems[0] || {};
           const collectedImages = Array.from(
@@ -328,7 +347,9 @@ export default function LandingEditor() {
             },
           };
         });
+        
         setSections(normalizedSections);
+        setSectionsBase(JSON.parse(JSON.stringify(normalizedSections)));
       } catch (error) {
         console.error("Error cargando landing del editor:", error);
         setHero(null);
@@ -343,6 +364,199 @@ export default function LandingEditor() {
 
     fetchData();
   }, []);
+
+  // Efecto simplificado para cargar traducciones
+  useEffect(() => {
+    const cargarTraducciones = async () => {
+      const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+      const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+      
+      console.log("Cargando traducciones para idioma:", idiomaEdicion, "Predeterminado:", codigoPredeterminado);
+      
+      if (idiomaEdicion === codigoPredeterminado) {
+        // Restaurar valores base (español)
+        console.log("Restaurando valores base en español");
+        setSections(JSON.parse(JSON.stringify(sectionsBase)));
+      } else {
+        // Cargar traducciones sobre valores base
+        try {
+          console.log("Cargando traducciones sobre valores base");
+          console.log("Sections base actual:", sectionsBase);
+          
+          // Secciones - crear copia profunda para no modificar el original
+          const sectionsTrads = await Promise.all(
+            sectionsBase.map(async (section) => {
+              const trads = await obtenerTraduccionesPorContenido("landing", section.id, idiomaEdicion);
+              return { sectionId: section.id, traducciones: trads };
+            })
+          );
+          
+          const sectionsFinal = sectionsBase.map(section => {
+            const trads = sectionsTrads.find(t => t.sectionId === section.id)?.traducciones || [];
+            if (trads.length === 0) return section;
+            
+            const sectionTraducida = JSON.parse(JSON.stringify(section));
+            sectionTraducida.props = { ...section.props };
+            
+            // Para secciones de tipo hero, traducir también los items
+            if (section.type === "hero" && sectionTraducida.props?.items) {
+              sectionTraducida.props.items = sectionTraducida.props.items.map((item: any) => {
+                const itemTraducido = { ...item };
+                trads.forEach(t => {
+                  // Traducir campos del item si coinciden
+                  if (t.campo.startsWith("item.") && itemTraducido[t.campo.replace("item.", "")] !== undefined) {
+                    itemTraducido[t.campo.replace("item.", "")] = t.valor;
+                  }
+                });
+                return itemTraducido;
+              });
+            }
+            
+            trads.forEach(t => {
+              if (sectionTraducida.props) {
+                sectionTraducida.props[t.campo] = t.valor;
+              }
+            });
+            return sectionTraducida;
+          });
+          
+          setSections(sectionsFinal);
+          console.log("Traducciones cargadas correctamente");
+        } catch (error) {
+          console.error("Error cargando traducciones:", error);
+          // Restaurar valores base en caso de error
+          setSections(JSON.parse(JSON.stringify(sectionsBase)));
+        }
+      }
+    };
+    
+    cargarTraducciones();
+  }, [idiomaEdicion, idiomasDisponibles, forceReload]);
+
+  const handleIdiomaChange = (nuevoIdioma: string) => {
+    setIdiomaEdicion(nuevoIdioma);
+  };
+
+  const saveAllTranslations = async () => {
+    if (sections.length === 0) return;
+    
+    const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+    const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+    
+    if (idiomaEdicion === codigoPredeterminado) {
+      return; // No guardar traducciones si estamos en idioma predeterminado
+    }
+    
+    try {
+      // Guardar traducciones de secciones (incluyendo hero sections)
+      for (const section of sections) {
+        // Solo guardar campos de contenido, no campos de configuración
+        const camposSeccion = Object.keys(section.props || {}).filter(key => 
+          typeof section.props[key] === 'string' && 
+          !key.includes('FontSize') && 
+          !key.includes('Radius') && 
+          !key.includes('Width') && 
+          !key.includes('Padding') && 
+          !key.includes('Align') &&
+          !key.includes('Border') &&
+          key !== 'videoUrl' &&
+          key !== 'googleMaps'
+        );
+        
+        if (camposSeccion.length === 0) continue;
+        
+        const originalSection = sectionsBase.find(s => s.id === section.id);
+        if (!originalSection) continue;
+        
+        const trads = await obtenerTraduccionesPorContenido("landing", section.id, idiomaEdicion);
+        const tradsMap = new Map(trads.map(t => [t.campo, t]));
+        
+        console.log(`Guardando traducciones para sección ${section.id}, campos:`, camposSeccion);
+        
+        for (const campo of camposSeccion) {
+          const valor = section.props[campo];
+          const valorOriginal = originalSection.props?.[campo];
+          
+          console.log(`Campo ${campo}: valor="${valor}", original="${valorOriginal}"`);
+          
+          // Guardar siempre cuando estamos en idioma diferente al predeterminado
+          if (valor) {
+            const existente = tradsMap.get(campo);
+            if (existente) {
+              await actualizarTraduccion(existente.id!, { valor });
+              console.log(`Actualizando traducción existente para ${campo}`);
+            } else {
+              await crearTraduccion({
+                tipo: "landing",
+                contenidoId: section.id,
+                idiomaCodigo: idiomaEdicion,
+                campo: campo,
+                valor: valor
+              });
+              console.log(`Creando nueva traducción para ${campo}`);
+            }
+          }
+        }
+        
+        // Para secciones de tipo hero, guardar también traducciones de items
+        if (section.type === "hero" && section.props?.items) {
+          const originalItems = originalSection.props?.items || [];
+          
+          console.log(`Guardando traducciones de items para sección hero ${section.id}`);
+          
+          for (let i = 0; i < section.props.items.length; i++) {
+            const item = section.props.items[i];
+            const originalItem = originalItems[i];
+            
+            if (!item || !originalItem) continue;
+            
+            // Solo guardar campos de contenido de items
+            const camposItem = Object.keys(item).filter(key => 
+              typeof item[key] === 'string' && 
+              key !== 'image' && 
+              key !== 'images' &&
+              key !== 'videoUrl' &&
+              !key.includes('fieldStyles')
+            );
+            
+            console.log(`Item ${i}, campos:`, camposItem);
+            
+            for (const campo of camposItem) {
+              const valor = item[campo];
+              const valorOriginal = originalItem[campo];
+              
+              console.log(`Item campo ${campo}: valor="${valor}", original="${valorOriginal}"`);
+              
+              // Guardar siempre cuando estamos en idioma diferente al predeterminado
+              if (valor) {
+                const campoTraduccion = `item.${campo}`;
+                const existente = tradsMap.get(campoTraduccion);
+                
+                if (existente) {
+                  await actualizarTraduccion(existente.id!, { valor });
+                  console.log(`Actualizando traducción existente para item.${campo}`);
+                } else {
+                  await crearTraduccion({
+                    tipo: "landing",
+                    contenidoId: section.id,
+                    idiomaCodigo: idiomaEdicion,
+                    campo: campoTraduccion,
+                    valor: valor
+                  });
+                  console.log(`Creando nueva traducción para item.${campo}`);
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      console.log("Traducciones guardadas exitosamente");
+    } catch (error) {
+      console.error("Error guardando traducciones:", error);
+      throw error;
+    }
+  };
 
   /* ============================
      HERO
@@ -365,8 +579,20 @@ export default function LandingEditor() {
 
   const saveHero = async () => {
     if (!hero) return;
+    
+    const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+    const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+    
     setSaving(true);
-    await updateHero(hero);
+    
+    if (idiomaEdicion === codigoPredeterminado) {
+      // Guardar secciones base (español) - el hero está en las secciones
+      await publishLanding();
+      setSectionsBase(JSON.parse(JSON.stringify(sections)));
+    } else {
+      // Guardar traducciones de secciones
+      await saveAllTranslations();
+    }
     setSaving(false);
     alert("Hero actualizado");
   };
@@ -379,7 +605,10 @@ export default function LandingEditor() {
     field: string,
     value: any
   ) => {
-    const updated = [...sections];
+    const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+    const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+    
+    const updated = JSON.parse(JSON.stringify(sections));
     const current = updated[idx];
     const baseProps = {
       ...(current.props || {}),
@@ -401,10 +630,17 @@ export default function LandingEditor() {
       ...current,
       props: baseProps,
     };
+    
+    // Siempre actualizar estado visualmente
     setSections(updated);
-    setSaving(true);
-    await saveLandingSections(updated);
-    setSaving(false);
+    
+    // Solo guardar automáticamente si estamos en idioma predeterminado
+    if (idiomaEdicion === codigoPredeterminado) {
+      setSaving(true);
+      await saveLandingSections(updated);
+      setSectionsBase(JSON.parse(JSON.stringify(updated)));
+      setSaving(false);
+    }
   };
 
   const toggleSectionHidden = async (id: string) => {
@@ -1195,7 +1431,14 @@ export default function LandingEditor() {
         .border-slate-200, .border-slate-300, .border-slate-400, .border-slate-700 { border-color: #000000 !important; }
         .bg-slate-50 { background-color: #f5f5f5 !important; }
       `}</style>
-      <h1 className="text-2xl font-bold mb-6">Editor de Landing</h1>
+      
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Editor de Landing</h1>
+        <TranslationEditor
+          onIdiomaChange={handleIdiomaChange}
+          idiomaActual={idiomaEdicion}
+        />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         {/* Columna izquierda: editor */}
@@ -3234,10 +3477,26 @@ export default function LandingEditor() {
             <button
               onClick={async () => {
                 setSaving(true);
-                // Guardar secciones (borrador)
-                await saveLandingSections(sections);
-                setSaving(false);
-                alert("Secciones guardadas como borrador");
+                try {
+                  const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+                  const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+                  
+                  if (idiomaEdicion === codigoPredeterminado) {
+                    // Solo guardar secciones si estamos en idioma predeterminado
+                    await saveLandingSections(sections);
+                    setSectionsBase(JSON.parse(JSON.stringify(sections)));
+                  } else {
+                    // Si estamos en otro idioma, NO guardar secciones, solo traducciones
+                    await saveAllTranslations();
+                  }
+                  
+                  setSaving(false);
+                  alert("Secciones guardadas como borrador");
+                } catch (error) {
+                  console.error("Error al guardar:", error);
+                  setSaving(false);
+                  alert("Error al guardar secciones");
+                }
               }}
               className="bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-60"
               disabled={saving}
@@ -3254,9 +3513,33 @@ export default function LandingEditor() {
             <button
               onClick={async () => {
                 setSaving(true);
-                await publishLanding();
-                setSaving(false);
-                alert("Landing publicada (hero y secciones)");
+                try {
+                  const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+                  const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+                  
+                  if (idiomaEdicion === codigoPredeterminado) {
+                    // Solo publicar landing si estamos en idioma predeterminado
+                    console.log("Publicando landing en idioma predeterminado");
+                    await publishLanding();
+                    // Actualizar valores originales (base en español)
+                    setHeroBase(JSON.parse(JSON.stringify(hero)));
+                    setSectionsBase(JSON.parse(JSON.stringify(sections)));
+                  } else {
+                    // Si estamos en otro idioma, NO publicar landing, solo guardar traducciones
+                    console.log("Guardando solo traducciones (NO publicar landing)");
+                    await saveAllTranslations();
+                    // Forzar recarga de traducciones para mostrar los valores guardados
+                    setForceReload(prev => prev + 1);
+                    console.log("Traducciones guardadas, forzando recarga");
+                  }
+                  
+                  setSaving(false);
+                  alert("Landing publicada (hero y secciones)");
+                } catch (error) {
+                  console.error("Error al publicar:", error);
+                  setSaving(false);
+                  alert("Error al publicar landing");
+                }
               }}
               className="bg-purple-700 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-60"
               disabled={saving}

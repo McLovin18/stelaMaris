@@ -895,6 +895,18 @@ export default function AdminEditBlogsPage() {
 						</div>
 					</section>
 
+					{/* Editor de traducciones para blogs */}
+					{editingBlog.id && (
+						<TranslationEditor
+							tipo="blog"
+							contenidoId={editingBlog.id}
+							campos={[
+								{ key: "title", label: "Título del blog", valorOriginal: editingBlog.title || "" },
+								{ key: "description", label: "Descripción", valorOriginal: editingBlog.description || "" },
+							]}
+						/>
+					)}
+
 					{/* Previsualización */}
 					<section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 md:p-5 flex flex-col min-h-[360px]">
 						<div className="flex items-center justify-between mb-3">

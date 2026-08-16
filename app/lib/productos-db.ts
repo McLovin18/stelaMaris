@@ -1,3 +1,5 @@
+import type { TranslatableText } from "./translations";
+
 // Tipos
 export interface StockVariant {
   talla?: string;
@@ -11,8 +13,8 @@ export interface StockVariant {
 
 export interface Producto {
   id: string;
-  nombre?: string;
-  descripcion?: string;
+  nombre?: TranslatableText;
+  descripcion?: TranslatableText;
   precio?: number;
   descuento?: number;
   stock?: number;

@@ -7,6 +7,9 @@ import { obtenerMarcas } from "../../lib/marcas-db";
 import { obtenerBodegas } from "../../lib/bodegas-db";
 import { obtenerAtributos, agregarValorAtributo } from "../../lib/atributos-db";
 import type { StockVariant } from "../../lib/productos-db";
+import { TranslationEditor } from "../../components/TranslationEditor";
+import { obtenerTraduccionesPorContenido, crearTraduccion, actualizarTraduccion } from "../../lib/traducciones-db";
+import { useLanguage } from "../../context/LanguageContext";
 
 // ─────────────────────────────────────────────────────────────────────────
 // FIXES APLICADOS PARA MOVIL (iPhone / Android) — ver resumen al final del chat
@@ -63,7 +66,7 @@ type FormSection = "general" | "stock" | "photos" | "price";
 // al ser File, no se pueden serializar de forma barata, así que se excluyen
 // del autoguardado).
 type DraftFields = {
-  nombre: string;
+  nombre: TranslatableText;
   sku: string;
   stock: number;
   precio: string;
@@ -71,7 +74,7 @@ type DraftFields = {
   categoria: string;
   subcategoria: string;
   subsubcategoria: string;
-  descripcion: string;
+  descripcion: TranslatableText;
   caracteristicas: string[];
   tieneMarca: boolean;
   marca: string;
@@ -131,7 +134,77 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
   // Si initialData existe, es edición, si no, es creación
   const isEdit = !!initialData;
   const [activeSection, setActiveSection] = useState<FormSection>("general");
-  const [nombre, setNombre] = useState<string>(initialData?.nombre || "");
+  const [idiomaEdicion, setIdiomaEdicion] = useState<string>("es"); // Idioma actual de edición
+  const { idiomaActual, idiomasDisponibles } = useLanguage();
+  
+  // Estado para los valores originales (siempre en español, inmutables)
+  const [valoresOriginales, setValoresOriginales] = useState({
+    nombre: typeof initialData?.nombre === 'string' ? initialData.nombre : String(initialData?.nombre || ""),
+    descripcion: typeof initialData?.descripcion === 'string' ? initialData.descripcion : String(initialData?.descripcion || ""),
+  });
+
+  // Estado para traducciones pendientes en creación
+  const [traduccionesPendientes, setTraduccionesPendientes] = useState<any[]>([]);
+
+  // Efecto para establecer valores originales cuando carga el producto
+  useEffect(() => {
+    if (initialData?.id) {
+      const nombreStr = typeof initialData.nombre === 'string' ? initialData.nombre : String(initialData.nombre || "");
+      const descripcionStr = typeof initialData.descripcion === 'string' ? initialData.descripcion : String(initialData.descripcion || "");
+      
+      setValoresOriginales({
+        nombre: nombreStr,
+        descripcion: descripcionStr,
+      });
+      // Inicializar campos con valores originales (español)
+      setNombre(nombreStr);
+      setDescripcion(descripcionStr);
+    } else if (!isEdit) {
+      // Si es creación nueva, inicializar en blanco
+      setValoresOriginales({
+        nombre: "",
+        descripcion: "",
+      });
+      setNombre("");
+      setDescripcion("");
+    }
+  }, [initialData?.id, initialData?.nombre, initialData?.descripcion, isEdit]);
+
+  // Efecto para cargar traducciones cuando cambia el idioma de edición
+  useEffect(() => {
+    if (!initialData?.id) return;
+    
+    const cargarTraducciones = async () => {
+      const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+      const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+      
+      if (idiomaEdicion === codigoPredeterminado) {
+        // Si estamos en el idioma predeterminado, usar el contenido original
+        setNombre(valoresOriginales.nombre);
+        setDescripcion(valoresOriginales.descripcion);
+      } else {
+        // Si estamos en otro idioma, cargar la traducción
+        try {
+          const traducciones = await obtenerTraduccionesPorContenido("producto", initialData.id, idiomaEdicion);
+          const nombreTraduccion = traducciones.find(t => t.campo === "nombre")?.valor;
+          const descripcionTraduccion = traducciones.find(t => t.campo === "descripcion")?.valor;
+          
+          setNombre(nombreTraduccion || valoresOriginales.nombre);
+          setDescripcion(descripcionTraduccion || valoresOriginales.descripcion);
+        } catch (error) {
+          console.error("Error cargando traducciones:", error);
+          // En caso de error, usar el contenido original
+          setNombre(valoresOriginales.nombre);
+          setDescripcion(valoresOriginales.descripcion);
+        }
+      }
+    };
+    
+    cargarTraducciones();
+  }, [idiomaEdicion, initialData?.id]);
+  
+  // Estado para los valores que se muestran en los campos (cambian según idioma)
+  const [nombre, setNombre] = useState<string>(typeof initialData?.nombre === 'string' ? initialData.nombre : String(initialData?.nombre || ""));
   const [sku, setSku] = useState<string>(initialData?.sku || "");
   const [hasVariations, setHasVariations] = useState<boolean>(Boolean(initialData?.hasVariations || initialData?.isCamiseta || (initialData?.stockVariants?.length ?? 0) > 0));
   const [stock, setStock] = useState<number>(initialData?.stock || 0);
@@ -146,7 +219,7 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
   const [subcategoria, setSubcategoria] = useState<string>(initialData?.subcategoria || "");
   const [subsubcategoria, setSubsubcategoria] = useState<string>(initialData?.subsubcategoria || "");
   const [imagenes, setImagenes] = useState<(string | File)[]>(initialData?.imagenes || []);
-  const [descripcion, setDescripcion] = useState<string>(initialData?.descripcion || "");
+  const [descripcion, setDescripcion] = useState<string>(typeof initialData?.descripcion === 'string' ? initialData.descripcion : String(initialData?.descripcion || ""));
   const [caracteristicas, setCaracteristicas] = useState<string[]>(initialData?.caracteristicas || [""]);
   const [tieneMarca, setTieneMarca] = useState<boolean>(Boolean(initialData?.marca));
   const [marca, setMarca] = useState<string>(initialData?.marca || "");
@@ -176,6 +249,45 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
     }
     return url;
   }, []);
+
+  // Cargar traducciones cuando cambia el idioma de edición
+  useEffect(() => {
+    const cargarTraduccionesPorIdioma = async () => {
+      if (!initialData?.id) return;
+      
+      // Obtener el idioma predeterminado
+      const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+      const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+      
+      if (idiomaEdicion === codigoPredeterminado) {
+        // Si es el idioma predeterminado, usar valores originales del producto
+        setNombre(valoresOriginales.nombre);
+        setDescripcion(valoresOriginales.descripcion);
+        return;
+      }
+
+      try {
+        const traducciones = await obtenerTraduccionesPorContenido("producto", initialData.id, idiomaEdicion);
+        const tradMap = new Map(traducciones.map(t => [t.campo, t.valor]));
+        
+        // Usar traducciones si existen, sino usar valores originales (español)
+        setNombre(tradMap.get("nombre") || valoresOriginales.nombre);
+        setDescripcion(tradMap.get("descripcion") || valoresOriginales.descripcion);
+      } catch (error) {
+        console.error("Error cargando traducciones:", error);
+        // Fallback a valores originales (español)
+        setNombre(valoresOriginales.nombre);
+        setDescripcion(valoresOriginales.descripcion);
+      }
+    };
+
+    cargarTraduccionesPorIdioma();
+  }, [idiomaEdicion, initialData?.id, valoresOriginales, idiomasDisponibles]);
+
+  // Manejar cambio de idioma de edición
+  const handleIdiomaChange = (nuevoIdioma: string) => {
+    setIdiomaEdicion(nuevoIdioma);
+  };
 
   // Libera todos los blob URLs cuando el componente se desmonta
   useEffect(() => {
@@ -756,7 +868,13 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
       <div className="space-y-7">
         <label className="block">
           <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">Título del producto</span>
-          <input className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-lg text-slate-900 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-100" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del producto" required />
+          <input 
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-lg text-slate-900 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-100" 
+            value={nombre} 
+            onChange={e => setNombre(e.target.value)} 
+            placeholder="Nombre del producto" 
+            required 
+          />
           <span className="mt-2 block text-sm text-slate-400">120 caracteres restantes</span>
         </label>
 
@@ -1293,7 +1411,8 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
         } else if (img instanceof File) {
           // Subir archivo a Storage
           const ext = img.name.split('.').pop();
-          const nombreArchivo = `${nombre.replace(/\s+/g, "_")}_${Date.now()}_${idx}.${ext}`;
+          const nombreStr = typeof nombre === 'string' ? nombre : nombre?.es || 'producto';
+          const nombreArchivo = `${nombreStr.replace(/\s+/g, "_")}_${Date.now()}_${idx}.${ext}`;
           const path = `productos/${nombreArchivo}`;
           try {
             const url = await uploadImageAndGetUrl(img, path);
@@ -1320,8 +1439,17 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
         setSku(finalSku);
       }
 
+      // Determinar si estamos en idioma predeterminado
+      const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+      const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+      
+      // Si estamos en idioma predeterminado, usar los valores actuales de los campos
+      // Si estamos en otro idioma, usar los valores originales (español)
+      const nombreParaGuardar = idiomaEdicion === codigoPredeterminado ? nombre : valoresOriginales.nombre;
+      const descripcionParaGuardar = idiomaEdicion === codigoPredeterminado ? descripcion : valoresOriginales.descripcion;
+
       onSave && onSave({
-        nombre,
+        nombre: nombreParaGuardar,
         sku: finalSku,
         stock: hasVariations ? undefined : stock,
         isCamiseta: hasVariations,
@@ -1336,11 +1464,68 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
         marca: tieneMarca ? marca : undefined,
         bodegaId,
         imagenes: imagenesFinal,
-        descripcion,
-        caracteristicas,
+        descripcion: descripcionParaGuardar,
+        caracteristicas: caracteristicas.map(c => c.trim()), // Trim caracteristicas
         personalizado,
         camposPersonalizacion: personalizado ? camposPersonalizacion.filter(c => c.nombre.trim() !== "") : undefined
       });
+
+      // Actualizar valores originales si estábamos en idioma predeterminado
+      if (idiomaEdicion === codigoPredeterminado) {
+        setValoresOriginales({
+          nombre: nombre,
+          descripcion: descripcion
+        });
+      }
+
+      // Guardar traducciones si estamos en un idioma diferente al predeterminado
+      if (idiomaEdicion !== codigoPredeterminado && (nombre !== valoresOriginales.nombre || descripcion !== valoresOriginales.descripcion)) {
+        try {
+          // Si es edición, usamos el ID del producto
+          if (isEdit && initialData?.id) {
+            const existentes = await obtenerTraduccionesPorContenido("producto", initialData.id, idiomaEdicion);
+            const existentesMap = new Map(existentes.map(t => [t.campo, t]));
+
+            // Guardar nombre si es diferente del original
+            if (nombre !== valoresOriginales.nombre) {
+              const existente = existentesMap.get("nombre");
+              if (existente) {
+                await actualizarTraduccion(existente.id!, { valor: nombre });
+              } else {
+                await crearTraduccion({
+                  tipo: "producto",
+                  contenidoId: initialData.id,
+                  idiomaCodigo: idiomaEdicion,
+                  campo: "nombre",
+                  valor: nombre
+                });
+              }
+            }
+
+            // Guardar descripción si es diferente del original
+            if (descripcion !== valoresOriginales.descripcion) {
+              const existente = existentesMap.get("descripcion");
+              if (existente) {
+                await actualizarTraduccion(existente.id!, { valor: descripcion });
+              } else {
+                await crearTraduccion({
+                  tipo: "producto",
+                  contenidoId: initialData.id,
+                  idiomaCodigo: idiomaEdicion,
+                  campo: "descripcion",
+                  valor: descripcion
+                });
+              }
+            }
+          } else {
+            // Si es creación, guardamos las traducciones temporalmente para después de crear el producto
+            console.log("Traducciones para crear producto:", { nombre, descripcion, idiomaEdicion });
+            // Las traducciones se guardarán después de obtener el ID del producto creado
+          }
+        } catch (error) {
+          console.error("Error guardando traducciones:", error);
+        }
+      }
 
       // Se guardó con éxito: ya no hace falta el borrador
       limpiarDraftGuardado();
@@ -1419,12 +1604,25 @@ export default function ProductoForm({ initialData = null, onSave, onCancel }: P
       <div className="space-y-8">
         {!isEdit ? (
           <>
+            {/* Selector de idioma de edición para creación */}
+            <TranslationEditor
+              onIdiomaChange={handleIdiomaChange}
+              idiomaActual={idiomaEdicion}
+            />
             {renderGeneralSection()}
             {renderStockSection()}
             {renderPriceSection()}
           </>
         ) : (
-          <>{renderActiveEditSection()}</>
+          <>
+            {/* Selector de idioma de edición */}
+            <TranslationEditor
+              onIdiomaChange={handleIdiomaChange}
+              idiomaActual={idiomaEdicion}
+
+            />
+            {renderActiveEditSection()}
+          </>
         )}
 
         <div className="flex flex-wrap items-center justify-end gap-4 rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sticky bottom-0 sm:static">

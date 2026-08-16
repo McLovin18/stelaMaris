@@ -9,6 +9,7 @@ const Sidebar = ({ role = "admin" }) => {
     { name: "Reseñas", path: "/admin/reviews", icon: "rate_review" },
     { name: "Editar landing", path: "/admin/edit-landing", icon: "edit" },
     { name: "Editar blogs", path: "/admin/edit-blogs", icon: "library_books" },
+    { name: "Idiomas", path: "/admin/idiomas", icon: "language" },
     { name: "Perfil", path: "/admin/perfil", icon: "person" },
     { name: "Configuración", path: "/admin/config", icon: "settings" },
   ];

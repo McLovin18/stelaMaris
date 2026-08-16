@@ -15,6 +15,9 @@ import BottomBarPublic from "../components/BottomBarPublic";
 import dynamic from "next/dynamic";
 import { getCartItemKey } from "../context/userLocalStorage";
 import { getCatalogPricing } from "../lib/pricing";
+import { useLanguage } from "../context/LanguageContext";
+import { useProductTranslations } from "../hooks/useProductTranslations";
+import { useUITranslation } from "../hooks/useUITranslation";
 
 const Markdown = dynamic(() => import("../components/Markdown"), { ssr: false });
 
@@ -45,6 +48,13 @@ export default function ProductDetailPage({ params }) {
   } = useUser();
 
   const { showToast } = useToast();
+  const { idiomaActual } = useLanguage();
+  const { t } = useUITranslation();
+
+  const { translations: productTranslations } = useProductTranslations(
+    producto?.id,
+    idiomaActual?.codigo || "es"
+  );
 
   const searchParams = useSearchParams();
 
@@ -321,7 +331,7 @@ export default function ProductDetailPage({ params }) {
         cartKey: currentCartKey,
       };
       addCarrito(cartItem);
-      showToast(`${producto.nombre} añadido al carrito`, "success");
+      showToast(`${productTranslations.nombre || producto.nombre} añadido al carrito`, "success");
     }
   };
   const handleFav = () => {
@@ -351,8 +361,8 @@ export default function ProductDetailPage({ params }) {
     return items;
   };
 
-  const descItems = parseDesc((producto as any).descripcion || "");
-  const rawDescripcion = (producto as any).descripcion || "";
+  const descItems = parseDesc(productTranslations.descripcion || (producto as any).descripcion || "");
+  const rawDescripcion = productTranslations.descripcion || (producto as any).descripcion || "";
 
   const inputCls =
     "w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:outline-none focus:border-slate-400 dark:focus:border-white/30 transition-colors";
@@ -389,7 +399,7 @@ export default function ProductDetailPage({ params }) {
               )}
               <img
                 src={producto.imagenes[imgIdx]}
-                alt={producto.nombre}
+                alt={productTranslations.nombre || producto.nombre}
                 className="w-full h-full object-contain p-5"
               />
               {producto.imagenes.length > 1 && imgIdx > 0 && (
@@ -443,7 +453,7 @@ export default function ProductDetailPage({ params }) {
                     }`}
                   >
                     <span className="material-icons-round text-[16px]">list_alt</span>
-                    Características
+                    {t("product.characteristics")}
                   </button>
                 )}
                 <button
@@ -457,7 +467,7 @@ export default function ProductDetailPage({ params }) {
                   }`}
                 >
                   <span className="material-icons-round text-[16px]">star_outline</span>
-                  Reseñas
+                  {t("product.reviews")}
                   {reviews.length > 0 && (
                     <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
                       activeTab === "resenas"
@@ -506,12 +516,12 @@ export default function ProductDetailPage({ params }) {
               <h1
                 className="text-2xl sm:text-3xl font-bold leading-tight text-slate-800 dark:text-white break-words max-w-full whitespace-pre-line"
                 style={{ wordBreak: "break-word", maxWidth: "100%" }}
-                title={producto.nombre}
+                title={productTranslations.nombre || producto.nombre}
               >
-                {producto.nombre}
+                {productTranslations.nombre || producto.nombre}
               </h1>
               <p className="text-xs text-slate-400 dark:text-white/20 mt-1.5">
-                SKU: {producto.sku || producto.id}
+                {t("product.sku")}: {producto.sku || producto.id}
               </p>
             </div>
 
@@ -547,7 +557,7 @@ export default function ProductDetailPage({ params }) {
 
             {/* Stock */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 dark:text-white/30 font-medium">Disponibilidad:</span>
+              <span className="text-xs text-slate-400 dark:text-white/30 font-medium">{t("product.stock")}:</span>
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                 hasVariations && variationAttributeIds.length > 0 && !variationAttributeIds.every(attrId => selectedVariations[attrId])
                   ? "bg-blue-50 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400"
@@ -556,10 +566,10 @@ export default function ProductDetailPage({ params }) {
                   : "bg-red-50 dark:bg-red-400/10 text-red-600 dark:text-red-400"
               }`}>
                 {hasVariations && variationAttributeIds.length > 0 && !variationAttributeIds.every(attrId => selectedVariations[attrId])
-                  ? "Selecciona opciones para ver stock"
+                  ? t("product.select_options")
                   : maxCantidad > 0
-                  ? `${maxCantidad} en stock`
-                  : "Sin stock"}
+                  ? `${maxCantidad} ${t("product.in_stock")}`
+                  : t("product.out_of_stock")}
               </span>
             </div>
 
@@ -635,7 +645,7 @@ export default function ProductDetailPage({ params }) {
             {/* Cantidad */}
             {maxCantidad > 0 && (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400 dark:text-white/30 font-medium">Cantidad:</span>
+                <span className="text-xs text-slate-400 dark:text-white/30 font-medium">{t("product.quantity")}:</span>
                 <div className="flex items-center bg-[var(--bgSecondary)] rounded-xl p-1 gap-1">
                   <button
                     onClick={() => setCantidad((v) => Math.max(1, v - 1))}
@@ -668,7 +678,7 @@ export default function ProductDetailPage({ params }) {
                 <span className="material-icons-round text-[18px]">
                   {inCart ? "remove_shopping_cart" : "add_shopping_cart"}
                 </span>
-                {inCart ? "Quitar del carrito" : "Añadir al carrito"}
+                {inCart ? t("product.remove_from_cart") : t("product.add_to_cart")}
               </button>
 
               {isLogged && (
@@ -690,7 +700,7 @@ export default function ProductDetailPage({ params }) {
 
             {/* Descripción debajo de Añadir al carrito */}
             <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-2 text-black dark:text-white">Descripción del producto</h2>
+              <h2 className="text-lg font-semibold mb-2 text-black dark:text-white">{t("product.product_description")}</h2>
               {rawDescripcion.trim() ? (
                 descItems.length > 0 && (descItems.length > 1 || descItems[0].sub.length > 0 || descItems[0].text !== rawDescripcion.trim()) ? (
                   <ul className="space-y-2">
@@ -761,7 +771,7 @@ export default function ProductDetailPage({ params }) {
                 }`}
               >
                 <span className="material-icons-round text-[16px]">list_alt</span>
-                Características
+                {t("product.characteristics")}
               </button>
             )}
             <button
@@ -775,7 +785,7 @@ export default function ProductDetailPage({ params }) {
               }`}
             >
               <span className="material-icons-round text-[16px]">star_outline</span>
-              Reseñas
+              {t("product.reviews")}
               {reviews.length > 0 && (
                 <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
                   activeTab === "resenas"
@@ -810,7 +820,7 @@ export default function ProductDetailPage({ params }) {
 
       {/* Productos relacionados */}
       <div className="max-w-7xl mx-auto w-full px-1 sm:px-3 pb-10">
-        <RelatedProductsCarousel productos={relacionados} title="Productos relacionados" />
+        <RelatedProductsCarousel productos={relacionados} title={t("product.related_products")} />
       </div>
     </div>
   );

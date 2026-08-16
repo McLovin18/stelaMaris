@@ -1,5 +1,6 @@
 import type { Timestamp } from "firebase/firestore";
 import type { LandingFieldStyle } from "./landing-types";
+import type { TranslatableText } from "./translations";
 
 export type BlogBlockType = "subtitle" | "paragraph" | "image";
 
@@ -9,28 +10,28 @@ export type BlogBlock =
   | {
       id: string;
       type: "subtitle";
-      text: string;
+      text: TranslatableText;
       style?: BlogFieldStyle;
     }
   | {
       id: string;
       type: "paragraph";
-      text: string;
+      text: TranslatableText;
       style?: BlogFieldStyle;
     }
   | {
       id: string;
       type: "image";
       url: string;
-      alt?: string;
-      caption?: string;
+      alt?: TranslatableText;
+      caption?: TranslatableText;
       style?: BlogFieldStyle;
     };
 
 export interface Blog {
   id: string;
-  title: string;
-  description: string;
+  title: TranslatableText;
+  description: TranslatableText;
   blocks: BlogBlock[];
   featured?: boolean;
   status: "draft" | "published";

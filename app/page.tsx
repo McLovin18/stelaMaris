@@ -9,9 +9,12 @@ import { getLandingPage } from "./lib/landing-db";
 import { obtenerProductos } from "./lib/productos-db";
 import type { LandingSection } from "./lib/landing-types";
 import { useUser } from "./context/UserContext";
+import { useLanguage } from "./context/LanguageContext";
+import { obtenerTraduccionesPorContenido } from "./lib/traducciones-db";
 
 export default function Home() {
   const { isLogged } = useUser();
+  const { idiomaActual } = useLanguage();
   const [landing, setLanding] = useState<{
     hero?: Record<string, any> | null;
     sections?: LandingSection[];
@@ -19,6 +22,7 @@ export default function Home() {
   } | null>(null);
   const [featuredProductsResolved, setFeaturedProductsResolved] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [translatedSections, setTranslatedSections] = useState<LandingSection[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -60,12 +64,72 @@ export default function Home() {
     };
   }, []);
 
+  // Cargar traducciones cuando cambia el idioma
+  useEffect(() => {
+    const loadTranslations = async () => {
+      if (!landing?.sections) return;
+      
+      const currentLanguageCode = idiomaActual?.codigo || "es";
+      const idiomaPredeterminado = "es";
+      
+      if (currentLanguageCode === idiomaPredeterminado) {
+        // Si es español, usar las secciones originales
+        setTranslatedSections(landing.sections);
+        return;
+      }
+      
+      try {
+        const sectionsTrads = await Promise.all(
+          landing.sections.map(async (section) => {
+            const trads = await obtenerTraduccionesPorContenido("landing", section.id, currentLanguageCode);
+            return { sectionId: section.id, traducciones: trads };
+          })
+        );
+        
+        const sectionsFinal = landing.sections.map(section => {
+          const trads = sectionsTrads.find(t => t.sectionId === section.id)?.traducciones || [];
+          if (trads.length === 0) return section;
+          
+          const sectionTraducida = JSON.parse(JSON.stringify(section));
+          sectionTraducida.props = { ...section.props };
+          
+          // Para secciones de tipo hero, traducir también los items
+          if (section.type === "hero" && sectionTraducida.props?.items) {
+            sectionTraducida.props.items = sectionTraducida.props.items.map((item: any) => {
+              const itemTraducido = { ...item };
+              trads.forEach(t => {
+                if (t.campo.startsWith("item.") && itemTraducido[t.campo.replace("item.", "")] !== undefined) {
+                  itemTraducido[t.campo.replace("item.", "")] = t.valor;
+                }
+              });
+              return itemTraducido;
+            });
+          }
+          
+          trads.forEach(t => {
+            if (sectionTraducida.props) {
+              sectionTraducida.props[t.campo] = t.valor;
+            }
+          });
+          return sectionTraducida;
+        });
+        
+        setTranslatedSections(sectionsFinal);
+      } catch (error) {
+        console.error("Error cargando traducciones:", error);
+        setTranslatedSections(landing.sections);
+      }
+    };
+    
+    loadTranslations();
+  }, [landing, idiomaActual]);
+
 
 
 
 
   const landingSections = useMemo(() => {
-    const sections = landing?.sections ?? [];
+    const sections = translatedSections ?? [];
     const heroSection = landing?.hero
       ? [
           {
@@ -81,7 +145,7 @@ export default function Home() {
     return [...heroSection, ...sections]
       .filter((section) => !section.hidden)
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  }, [landing]);
+  }, [landing, translatedSections]);
 
   const renderedSections = useMemo(() => {
     const featuredCategoryItemsFromProducts = featuredProductsResolved

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import InfoSlider from "./InfoSlider";
+import { LanguageSelector } from "./LanguageSelector";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import {
@@ -13,6 +14,7 @@ import {
 import { obtenerProductos } from "../lib/productos-db";
 import { useUser } from "../context/UserContext";
 import { productMatches } from "../lib/search-utils";
+import { useUITranslation } from "../hooks/useUITranslation";
 
 // ─────────────────────────────────────────────
 // Paleta de marca — Tienda Virtual (Rosa/Coral)
@@ -31,7 +33,7 @@ const BRAND = {
 // ─────────────────────────────────────────────
 // Acordeón de categorías para el drawer móvil
 // ─────────────────────────────────────────────
-function MobileCategoriesAccordion({ basePath }: { basePath: string }) {
+function MobileCategoriesAccordion({ basePath, t }: { basePath: string; t: (key: string) => string }) {
   const [categorias, setCategorias] = React.useState<any[]>([]);
   const [openCat, setOpenCat] = React.useState<string | null>(null);
   const [openSub, setOpenSub] = React.useState<string | null>(null);
@@ -47,7 +49,7 @@ function MobileCategoriesAccordion({ basePath }: { basePath: string }) {
     <div className="flex flex-col gap-1 my-3">
       <p className="text-xs font-semibold uppercase tracking-wider px-2 mb-1"
         style={{ color: BRAND.textMuted }}>
-        Categorías
+        {t("nav.categories")}
       </p>
       {categorias.map((cat) => (
         <div key={cat.id}>
@@ -164,6 +166,7 @@ export const Navbar = () => {
   const [openCatId, setOpenCatId] = useState<string | null>(null);
   const [openSubId, setOpenSubId] = useState<string | null>(null);
   const { user, carrito } = useUser();
+  const { t } = useUITranslation();
   const [windowWidth, setWindowWidth] = useState<number | null>(null);
 
   // Barra de búsqueda
@@ -250,9 +253,9 @@ export const Navbar = () => {
     : "/products-by-category";
 
   const links = [
-    { href: "/", label: "Inicio" },
-    { href: "/productos", label: "Catálogo" },
-    { href: "/blogs", label: "Blogs" },
+    { href: "/", label: t("nav.home") },
+    { href: "/productos", label: t("nav.products") },
+    { href: "/blogs", label: t("nav.blogs") },
 
   ];
 
@@ -316,7 +319,7 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-            <div className="relative" ref={searchContainerRef}>
+            <div className="relative hidden sm:block" ref={searchContainerRef}>
               {!searchOpen ? (
                 <button
                   type="button"
@@ -342,7 +345,7 @@ export const Navbar = () => {
                     <input
                       ref={searchInputRef}
                       type="text"
-                      placeholder="Buscar un producto..."
+                      placeholder={t("nav.search_placeholder")}
                       className="bg-transparent outline-none text-sm flex-1 text-body"
                       style={{ color: "#0f172a", minWidth: 140 }}
                       autoComplete="off"
@@ -404,7 +407,7 @@ export const Navbar = () => {
                         })
                       ) : (
                         <div className="p-4 text-center text-sm" style={{ color: "#64748b" }}>
-                          Sin resultados
+                          {t("general.no_results")}
                         </div>
                       )}
                     </div>
@@ -412,7 +415,11 @@ export const Navbar = () => {
                 </form>
               )}
             </div>
-            <div className="relative flex flex-col items-center">
+            
+            {/* Selector de idioma */}
+            <LanguageSelector />
+            
+            <div className="relative flex flex-col items-center hidden sm:block">
               <a
                 href={user ? "/admin/cart" : "/cart"}
                 className="flex items-center justify-center px-1 rounded-xl transition-colors text-white hover:bg-white/10"
@@ -463,14 +470,14 @@ export const Navbar = () => {
                       className="flex items-center gap-2 px-4 py-3 text-sm transition-colors text-slate-900 hover:bg-slate-50 text-body"
                     >
                       <span className="material-icons-round text-base">person_outline</span>
-                      Perfil
+                      {t("nav.account")}
                     </a>
                     <a
                       href="/admin/config"
                       className="flex items-center gap-2 px-4 py-3 text-sm transition-colors text-slate-900 hover:bg-slate-50 text-body"
                     >
                       <span className="material-icons-round text-base">tune</span>
-                      Configuración
+                      {t("general.edit")}
                     </a>
                     <div className="border-t" style={{ borderColor: "rgba(17,24,39,0.12)" }} />
                     <button
@@ -483,7 +490,7 @@ export const Navbar = () => {
                       }}
                     >
                       <span className="material-icons-round text-base">logout</span>
-                      Cerrar sesión
+                      {t("general.delete")}
                     </button>
                   </div>
                 )}
@@ -656,7 +663,7 @@ export const Navbar = () => {
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="Buscar productos..."
+                  placeholder={t("nav.search_placeholder")}
                   className="bg-transparent outline-none text-sm flex-1"
                   style={{ color: BRAND.white }}
                   value={searchValue}
@@ -712,7 +719,7 @@ export const Navbar = () => {
                       })
                     ) : (
                       <div className="p-4 text-center text-sm" style={{ color: BRAND.white }}>
-                        Sin resultados
+                        {t("general.no_results")}
                       </div>
                     )}
                   </div>
@@ -732,7 +739,16 @@ export const Navbar = () => {
               ))}
 
               {/* Categorías en acordeón */}
-              <MobileCategoriesAccordion basePath={basePath} />
+              <MobileCategoriesAccordion basePath={basePath} t={t} />
+
+              {/* Selector de idioma móvil */}
+              <div className="border-t my-2" style={{ borderColor: BRAND.border }}>
+                <p className="text-xs font-semibold uppercase tracking-wider px-2 mb-2"
+                  style={{ color: BRAND.textMuted }}>
+                  Idioma
+                </p>
+                <LanguageSelector />
+              </div>
 
               <div className="border-t my-2" style={{ borderColor: BRAND.border }} />
 

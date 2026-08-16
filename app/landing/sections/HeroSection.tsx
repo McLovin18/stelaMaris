@@ -6,33 +6,36 @@ import type {
   LandingFieldStyle,
   FieldPosition,
 } from "../../lib/landing-types";
+import { useLanguage } from "../../context/LanguageContext";
+import { getText } from "../../lib/translations";
+import type { TranslatableText } from "../../lib/translations";
 
 // ── Hook ────────────────────────────────────────────────────────────────────
 // Eliminado hook personalizado para evitar problemas con hooks
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 type HeroItem = {
-  title?: string;
-  subtitle?: string;
-  badge?: string;
-  buttonText?: string;
+  title?: TranslatableText;
+  subtitle?: TranslatableText;
+  badge?: TranslatableText;
+  buttonText?: TranslatableText;
   buttonLink?: string;
   image?: string | null;
-  generalMessage?: string;
+  generalMessage?: TranslatableText;
   fieldStyles?: Record<string, LandingFieldStyle>;
   fieldPositions?: Record<string, { desktop?: FieldPosition; mobile?: FieldPosition }>;
 };
 
 export type HeroSectionProps = {
-  title?: string;
-  subtitle?: string;
-  badge?: string;
+  title?: TranslatableText;
+  subtitle?: TranslatableText;
+  badge?: TranslatableText;
   titleMobileFontSize?: string | number;
   subtitleMobileFontSize?: string | number;
   badgeMobileFontSize?: string | number;
   buttonTextMobileFontSize?: string | number;
-  generalMessage?: string;
-  buttonText?: string;
+  generalMessage?: TranslatableText;
+  buttonText?: TranslatableText;
   buttonLink?: string;
   image?: string | null;
   styles?: LandingSectionStyles;
@@ -64,6 +67,8 @@ export default function HeroSection({
 }: HeroSectionProps) {
   
   // ── TODOS los hooks primero ────────────────────────────────────────────────
+  const { idiomaActual } = useLanguage();
+  const languageCode = idiomaActual?.codigo || "es";
   const [screenType, setScreenType] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [isDesktop, setIsDesktop] = React.useState<boolean>(() => {
@@ -190,6 +195,13 @@ export default function HeroSection({
   const current = heroItems.length > 0 ? heroItems[Math.min(currentIndex, heroItems.length - 1)] : null;
   const currentFieldStyles = current?.fieldStyles || {};
   const currentFieldPositions = current?.fieldPositions || fieldPositions || {};
+  
+  // Get translated text for current item
+  const currentTitle = getText(current?.title, languageCode, current?.title as string);
+  const currentSubtitle = getText(current?.subtitle, languageCode, current?.subtitle as string);
+  const currentBadge = getText(current?.badge, languageCode, current?.badge as string);
+  const currentButtonText = getText(current?.buttonText, languageCode, current?.buttonText as string);
+  const currentGeneralMessage = getText(current?.generalMessage, languageCode, current?.generalMessage as string);
 
   // debug logs removed
 
@@ -294,7 +306,7 @@ const innerStyle: React.CSSProperties = {
         {current?.image && (
           <img
             src={current.image}
-            alt={current.title || "Hero"}
+            alt={currentTitle || "Hero"}
             width={1920}
             height={840}
             loading="eager"
@@ -316,7 +328,7 @@ const innerStyle: React.CSSProperties = {
               ...badgeStyle,
             }}
           >
-            {current.badge}
+            {currentBadge}
           </span>
         )}
 
@@ -329,7 +341,7 @@ const innerStyle: React.CSSProperties = {
               maxWidth: "90%",
             }}
           >
-            {current.title}
+            {currentTitle}
           </h2>
         )}
 
@@ -342,7 +354,7 @@ const innerStyle: React.CSSProperties = {
               maxWidth: "90%",
             }}
           >
-            {current.subtitle}
+            {currentSubtitle}
           </p>
         )}
 
@@ -355,7 +367,7 @@ const innerStyle: React.CSSProperties = {
               ...buttonTextStyle,
             }}
           >
-            <span>{current.buttonText}</span>
+            <span>{currentButtonText}</span>
             <span className="material-icons-round text-xs sm:text-sm">arrow_forward</span>
           </a>
         )}
@@ -391,7 +403,7 @@ const innerStyle: React.CSSProperties = {
                     className="inline-block px-2 py-0.5 text-[6px] sm:px-3 sm:py-1 sm:text-xs font-bold tracking-widest uppercase bg-white/90 text-black dark:bg-slate-900/90 dark:text-white rounded-full shadow"
                     style={{ ...defaultBadgeInlineStyle, ...badgeStyle }}
                   >
-                    {current.badge}
+                    {currentBadge}
                   </span>
                 )}
                 {current?.title && (
@@ -399,7 +411,7 @@ const innerStyle: React.CSSProperties = {
                     className="text-xl sm:text-5xl lg:text-5xl font-extrabold text-white leading-tight max-w-[90vw] sm:max-w-2xl drop-shadow-lg"
                     style={{ ...defaultTitleInlineStyle, ...titleStyle }}
                   >
-                    {current.title}
+                    {currentTitle}
                   </h2>
                 )}
                 {current?.subtitle && (
@@ -407,7 +419,7 @@ const innerStyle: React.CSSProperties = {
                     className="text-white/80 text-[9px] sm:text-sm max-w-[90vw] sm:max-w-2xl drop-shadow"
                     style={{ ...defaultSubtitleInlineStyle, ...subtitleStyle }}
                   >
-                    {current.subtitle}
+                    {currentSubtitle}
                   </p>
                 )}
             </div>
@@ -422,7 +434,7 @@ const innerStyle: React.CSSProperties = {
               className="inline-flex items-center sm:gap-2 bg-white/95 hover:bg-white text-black font-bold text-[9px] sm:text-2xl px-3 py-1.5 sm:px-4 sm:py-3 rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
               style={{ ...defaultButtonInlineStyle, ...buttonTextStyle }}
             >
-              <span>{current.buttonText}</span>
+              <span>{currentButtonText}</span>
             </a>
           </div>
         )}

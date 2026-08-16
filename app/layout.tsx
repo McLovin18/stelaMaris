@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import { UserProvider } from "./context/UserContext";
 import { OnboardingProvider } from "./context/OnboardingContext";
 import { ToastProvider } from "./context/ToastContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import LayoutContentClient from "./components/LayoutContentClient";
 import { StructuredData } from "./components/StructuredData";
 import type { Metadata, Viewport } from "next";
@@ -145,7 +146,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="relative">
         <ToastProvider>
           <OnboardingProvider>
-            <LayoutContentClient>{children}</LayoutContentClient>
+            <LanguageProvider>
+              <LayoutContentClient>{children}</LayoutContentClient>
+            </LanguageProvider>
           </OnboardingProvider>
         </ToastProvider>
       </body>

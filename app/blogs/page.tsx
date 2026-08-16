@@ -7,10 +7,14 @@ import { getPublishedBlogs } from "../lib/blogs-db";
 import { useTracking } from "../lib/useAnalytics";
 import type { Blog } from "../lib/blog-types";
 import BottomBarPublic from "../components/BottomBarPublic";
+import { useLanguage } from "../context/LanguageContext";
+import { getText } from "../lib/translations";
 
 export default function BlogsPage() {
   const router = useRouter();
   const { trackBlogClick } = useTracking();
+  const { idiomaActual } = useLanguage();
+  const languageCode = idiomaActual?.codigo || "es";
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -89,7 +93,7 @@ export default function BlogsPage() {
                           }
                           alt={
                             featured.blocks.find((b) => b.type === "image")?.type === "image"
-                              ? featured.blocks.find((b) => b.type === "image")?.alt || featured.title
+                              ? getText(featured.blocks.find((b) => b.type === "image")?.alt, languageCode, featured.blocks.find((b) => b.type === "image")?.alt as string) || getText(featured.title, languageCode, featured.title as string)
                               : ""
                           }
                           className="w-full h-full object-cover"
@@ -98,10 +102,10 @@ export default function BlogsPage() {
                     </div>
                   )}
                   <div className="p-6 flex flex-col justify-center flex-1">
-                    <h3 className="text-xl font-bold mb-2">{featured.title}</h3>
+                    <h3 className="text-xl font-bold mb-2">{getText(featured.title, languageCode, featured.title as string)}</h3>
                     {featured.description && (
                       <p className="text-sm text-slate-600 dark:text-slate-300 mb-3 line-clamp-2">
-                        {featured.description}
+                        {getText(featured.description, languageCode, featured.description as string)}
                       </p>
                     )}
                     <div className="inline-flex items-center gap-1 text-sm text-#E0A11A dark:text-#f5d890 mt-1 w-fit">
@@ -132,16 +136,16 @@ export default function BlogsPage() {
                           <div className="w-full h-40 overflow-hidden">
                             <img
                               src={imageBlock.url}
-                              alt={imageBlock.alt || b.title}
+                              alt={getText(imageBlock.alt, languageCode, imageBlock.alt as string) || getText(b.title, languageCode, b.title as string)}
                               className="w-full h-full object-cover"
                             />
                           </div>
                         )}
                         <div className="p-4 flex flex-col flex-1">
-                          <h3 className="text-lg font-semibold mb-2">{b.title}</h3>
+                          <h3 className="text-lg font-semibold mb-2">{getText(b.title, languageCode, b.title as string)}</h3>
                           {b.description && (
                             <p className="text-sm text-slate-600 dark:text-slate-300 mb-3 line-clamp-3 flex-1">
-                              {b.description}
+                              {getText(b.description, languageCode, b.description as string)}
                             </p>
                           )}
                           <div className="inline-flex items-center gap-1 text-xs text-#E0A11A dark:text-#f5d890 mt-auto">

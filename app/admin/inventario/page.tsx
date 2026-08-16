@@ -107,8 +107,8 @@ export default function AdminInventario() {
   const productosFiltrados = productos
     .filter((p) => {
       const texto = search.trim().toLowerCase();
-      const nombre = p.nombre?.toLowerCase() || "";
-      const desc = p.descripcion?.toLowerCase() || "";
+      const nombre = typeof p.nombre === 'string' ? p.nombre.toLowerCase() : (p.nombre?.es || "").toLowerCase();
+      const desc = typeof p.descripcion === 'string' ? p.descripcion.toLowerCase() : (p.descripcion?.es || "").toLowerCase();
       if (texto && !nombre.includes(texto) && !desc.includes(texto)) return false;
       if (selectedCategoria && p.categoria !== selectedCategoria) return false;
       if (selectedSubcategoria && p.subcategoria !== selectedSubcategoria) return false;
@@ -339,10 +339,10 @@ export default function AdminInventario() {
                             <td className="px-6 py-3">
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-12 h-12 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center shrink-0 border" style={{ borderColor: "#000000" }}>
-                                  <img src={thumb} alt={p.nombre} className="object-contain w-full h-full" />
+                                  <img src={thumb} alt={typeof p.nombre === 'string' ? p.nombre : p.nombre?.es || 'Producto'} className="object-contain w-full h-full" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="font-semibold truncate" style={{ color: "#000000" }}>{p.nombre}</div>
+                                  <div className="font-semibold truncate" style={{ color: "#000000" }}>{typeof p.nombre === 'string' ? p.nombre : p.nombre?.es || 'Sin nombre'}</div>
                                   <div className="text-xs truncate" style={{ color: "#666666" }}>SKU: {p.sku || p.id}</div>
                                   <div className="mt-1 flex items-center gap-2 text-xs whitespace-nowrap">
                                     <button className="text-rose-600 font-medium" onClick={() => { setEditData(p); setShowForm(true); }}>Editar</button>

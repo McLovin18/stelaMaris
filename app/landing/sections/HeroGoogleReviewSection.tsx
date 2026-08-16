@@ -2,6 +2,8 @@
 
 import React from "react";
 import type { HeroGoogleReview, LandingSectionStyles, LandingFieldStyle } from "../../lib/landing-types";
+import { useLanguage } from "../../context/LanguageContext";
+import { getText } from "../../lib/translations";
 
 export type HeroGoogleReviewSectionProps = HeroGoogleReview;
 
@@ -18,6 +20,15 @@ export default function HeroGoogleReviewSection({
   ratingCount,
   generalMessage,
 }: HeroGoogleReviewSectionProps) {
+  const { idiomaActual } = useLanguage();
+  const languageCode = idiomaActual?.codigo || "es";
+  
+  const translatedTitle = getText(title, languageCode, title as string);
+  const translatedSubtitle = getText(subtitle, languageCode, subtitle as string);
+  const translatedBadge = getText(badge, languageCode, badge as string);
+  const translatedButtonText = getText(buttonText, languageCode, buttonText as string);
+  const translatedGeneralMessage = getText(generalMessage, languageCode, generalMessage as string);
+  
   const bg = styles?.backgroundColor;
   const color = styles?.textColor;
   const paddingTop = styles?.paddingTop || "3rem";
@@ -48,7 +59,7 @@ export default function HeroGoogleReviewSection({
         {image && (
           <img
             src={image}
-            alt={title || "Hero"}
+            alt={translatedTitle || "Hero"}
             className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
           />
         )}
@@ -59,7 +70,7 @@ export default function HeroGoogleReviewSection({
               className="section-eyebrow inline-block px-3 py-1 mb-4 text-[10px] bg-white text-black dark:bg-slate-900 dark:text-white rounded-full"
               style={badgeStyle}
             >
-              {badge}
+              {translatedBadge}
             </span>
           )}
           {title && (
@@ -67,7 +78,7 @@ export default function HeroGoogleReviewSection({
               className="section-title text-white mb-4 leading-tight max-w-3xl"
               style={titleStyle}
             >
-              {title}
+              {translatedTitle}
             </h2>
           )}
           {subtitle && (
@@ -75,7 +86,7 @@ export default function HeroGoogleReviewSection({
               className="section-subtitle page-lead text-slate-300 mb-6 max-w-xl"
               style={subtitleStyle}
             >
-              {subtitle}
+              {translatedSubtitle}
             </p>
           )}
           {/* Calificación de Google Maps */}
@@ -89,7 +100,7 @@ export default function HeroGoogleReviewSection({
             </div>
           )}
           {generalMessage && (
-            <div className="mb-4 text-white text-base font-medium">{generalMessage}</div>
+            <div className="mb-4 text-white text-base font-medium">{translatedGeneralMessage}</div>
           )}
           {buttonText && (
             <a
@@ -97,7 +108,7 @@ export default function HeroGoogleReviewSection({
               className="inline-flex items-center justify-center gap-2 py-4 px-6 bg-white text-black dark:bg-slate-900 dark:text-white font-bold rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-transform whitespace-nowrap"
               style={buttonTextStyle}
             >
-              <span>{buttonText}</span>
+              <span>{translatedButtonText}</span>
               <span className="material-icons-round text-sm">arrow_forward</span>
             </a>
           )}

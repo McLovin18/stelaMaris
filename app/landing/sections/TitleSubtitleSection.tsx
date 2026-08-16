@@ -6,10 +6,13 @@ import type {
   LandingFieldStyle,
   FieldPosition,
 } from "../../lib/landing-types";
+import { useLanguage } from "../../context/LanguageContext";
+import { getText } from "../../lib/translations";
+import type { TranslatableText } from "../../lib/translations";
 
 export type TitleSubtitleSectionProps = {
-  title?: string;
-  subtitle?: string;
+  title?: TranslatableText;
+  subtitle?: TranslatableText;
   styles?: LandingSectionStyles;
   fieldStyles?: Record<string, LandingFieldStyle>;
   fieldPositions?: Record<string, { desktop?: FieldPosition; mobile?: FieldPosition }>;
@@ -22,6 +25,12 @@ export default function TitleSubtitleSection({
   fieldStyles,
   fieldPositions,
 }: TitleSubtitleSectionProps) {
+  const { idiomaActual } = useLanguage();
+  const languageCode = idiomaActual?.codigo || "es";
+  
+  const translatedTitle = getText(title, languageCode, title as string);
+  const translatedSubtitle = getText(subtitle, languageCode, subtitle as string);
+  
   const bg = styles?.backgroundColor;
   const color = styles?.textColor;
   const paddingTop = styles?.paddingTop || "2rem";
@@ -80,7 +89,7 @@ export default function TitleSubtitleSection({
               textAlign,
             }}
           >
-            {title}
+            {translatedTitle}
           </h2>
         )}
         {subtitle && (
@@ -94,7 +103,7 @@ export default function TitleSubtitleSection({
               textAlign,
             }}
           >
-            {subtitle}
+            {translatedSubtitle}
           </p>
         )}
       </div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTracking } from "../lib/useAnalytics";
 import WhatsAppFloatingButton from "./WhatsAppFloatingButton";
 import styles from "./Footer.module.css";
+import { useUITranslation } from "../hooks/useUITranslation";
 
 const IconInstagram = () => (
   <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
@@ -43,6 +44,7 @@ const MAPS_URL = "https://maps.google.com"; // enlace real de Google Maps
 const Footer: React.FC = () => {
   const pathname = usePathname();
   const { trackLinkClick } = useTracking();
+  const { t } = useUITranslation();
 
   const showWhatsAppFloating = pathname && !pathname.startsWith("/admin");
 
@@ -65,7 +67,7 @@ const Footer: React.FC = () => {
                 by Gabriela Cárdenas
               </span>
               <p className="text-xs text-white mt-1 max-w-[220px]">
-                Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia.
+                {t("footer.description")}
               </p>
             </div>
 
@@ -91,7 +93,7 @@ const Footer: React.FC = () => {
 
             {/* Columna 3: Cosas de la marca */}
             <div className="flex flex-col items-center md:items-start gap-2">
-              <span className="text-xs font-bold text-white mb-1">Información de Stella Maris</span>
+              <span className="text-xs font-bold text-white mb-1">{t("footer.brand_content")}</span>
               <ul className="flex flex-col gap-1.5">
                 <li>
                   <a
@@ -99,7 +101,7 @@ const Footer: React.FC = () => {
                     className="text-xs text-white hover:text-white/80 transition-colors"
                     onClick={() => trackLinkClick().catch(console.error)}
                   >
-                    Historia
+                    {t("footer.history")}
                   </a>
                 </li>
                 <li>
@@ -108,7 +110,7 @@ const Footer: React.FC = () => {
                     className="text-xs text-white hover:text-white/80 transition-colors"
                     onClick={() => trackLinkClick().catch(console.error)}
                   >
-                    Filosofía
+                    {t("footer.philosophy")}
                   </a>
                 </li>
                 <li>
@@ -117,7 +119,7 @@ const Footer: React.FC = () => {
                     className="text-xs text-white hover:text-white/80 transition-colors"
                     onClick={() => trackLinkClick().catch(console.error)}
                   >
-                    Visibilidad
+                    {t("footer.visibility")}
                   </a>
                 </li>
               </ul>
@@ -144,7 +146,7 @@ const Footer: React.FC = () => {
                 onClick={() => trackLinkClick().catch(console.error)}
               >
                 <IconLocation />
-                <span>Ecuador 🇪🇨</span>
+                <span>{t("footer.location")}</span>
               </a>
             </div>
           </div>
@@ -156,12 +158,12 @@ const Footer: React.FC = () => {
         {/* Copyright row */}
         <div className={styles.ftCopyRow}>
           <p className={styles.ftCopyText}>
-            © {new Date().getFullYear()} Stella Maris 👛 by Gabriela Cárdenas. Todos los derechos reservados.
+            © {new Date().getFullYear()} Stella Maris 👛 by Gabriela Cárdenas. {t("footer.copyright")}
           </p>
           <div className={styles.ftCopyRight}>
             <div className={styles.ftBadge}>
               <div className={styles.ftBadgeDot} />
-              Hecho en Ecuador
+              {t("footer.made_in")}
             </div>
             <a
               href="https://www.instagram.com/hector.cobena/"
@@ -170,7 +172,7 @@ const Footer: React.FC = () => {
               className={styles.ftDevLink}
               onClick={() => trackLinkClick().catch(console.error)}
             >
-              Desarrollado por Héctor Cobeña
+              {t("footer.developer")} Héctor Cobeña
             </a>
           </div>
         </div>
