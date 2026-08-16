@@ -2,17 +2,19 @@
 "use client";
 import React from "react";
 import { useUser } from "../context/UserContext";
-
-const publicItems = [
-  { name: "Inicio", path: "/", icon: "home" },
-  { name: "Productos", path: "/products-by-category", icon: "store" },
-  { name: "Carrito", path: "/cart", icon: "shopping_bag" },
-  { name: "Buscar", path: "/search-results", icon: "search" },
-];
+import { useUITranslation } from "../hooks/useUITranslation";
 
 export default function BottomBarPublic() {
   const { carrito } = useUser();
+  const { t } = useUITranslation();
   const cartCount = carrito?.length ?? 0;
+
+  const publicItems = [
+    { name: t("bottombar.home"), path: "/", icon: "home" },
+    { name: t("bottombar.products"), path: "/products-by-category", icon: "store" },
+    { name: t("bottombar.cart"), path: "/cart", icon: "shopping_bag" },
+    { name: t("bottombar.search"), path: "/search-results", icon: "search" },
+  ];
 
   return (
     <nav

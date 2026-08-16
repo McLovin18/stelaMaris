@@ -14,6 +14,10 @@ export const uiTranslations = {
     "nav.categories": "Categorías",
     "nav.search": "Buscar",
     "nav.search_placeholder": "Buscar productos...",
+    "bottombar.home": "Inicio",
+    "bottombar.products": "Productos",
+    "bottombar.cart": "Carrito",
+    "bottombar.search": "Buscar",
     
     // Página de detalle de producto
     "product.add_to_cart": "Añadir al carrito",
@@ -84,6 +88,10 @@ export const uiTranslations = {
     "nav.categories": "Categories",
     "nav.search": "Search",
     "nav.search_placeholder": "Search products...",
+    "bottombar.home": "Home",
+    "bottombar.products": "Products",
+    "bottombar.cart": "Cart",
+    "bottombar.search": "Search",
     
     // Product detail page
     "product.add_to_cart": "Add to cart",
