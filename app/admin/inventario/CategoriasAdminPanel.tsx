@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { obtenerCategorias, guardarCategoria, eliminarCategoria } from "../../lib/categorias-db";
+import { TranslationEditor } from "../../components/TranslationEditor";
+import { obtenerIdiomas } from "../../lib/idiomas-db";
+import { obtenerTraduccionesPorContenido, crearTraduccion, actualizarTraduccion } from "../../lib/traducciones-db";
 
 export type Categoria = {
   id: string;
@@ -96,16 +99,95 @@ export default function CategoriasAdminPanel({ onCategoriasChange }: { onCategor
   const [dragOverPath, setDragOverPath] = useState<number[] | null>(null);
   const [editingPath, setEditingPath] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [idiomasDisponibles, setIdiomasDisponibles] = useState<any[]>([]);
+  const [idiomaEdicion, setIdiomaEdicion] = useState<string>("es");
+  const [categoriasTraducidas, setCategoriasTraducidas] = useState<Categoria[]>([]);
 
   // Cargar categorías desde Firestore
   useEffect(() => {
     obtenerCategorias().then(cats => setCategorias(cats || []));
   }, []);
 
+  // Cargar idiomas disponibles
+  useEffect(() => {
+    obtenerIdiomas().then(idiomas => setIdiomasDisponibles(idiomas));
+  }, []);
+
+  // Cargar traducciones de categorías cuando cambia el idioma
+  useEffect(() => {
+    const cargarTraducciones = async () => {
+      if (idiomaEdicion === "es") {
+        setCategoriasTraducidas(categorias);
+        return;
+      }
+
+      try {
+        const catsConTraducciones = await Promise.all(
+          categorias.map(async (cat) => {
+            const trads = await obtenerTraduccionesPorContenido("categoria", cat.id, idiomaEdicion);
+            const nombreTrad = trads.find(t => t.campo === "nombre")?.valor;
+
+            const catTraducido = JSON.parse(JSON.stringify(cat)) as Categoria;
+            if (nombreTrad) {
+              catTraducido.nombre = nombreTrad;
+            }
+
+            // Traducir subcategorías recursivamente
+            if (cat.subcategorias) {
+              catTraducido.subcategorias = await Promise.all(
+                cat.subcategorias.map(async (sub) => {
+                  const subTrads = await obtenerTraduccionesPorContenido("categoria", sub.id, idiomaEdicion);
+                  const subNombreTrad = subTrads.find(t => t.campo === "nombre")?.valor;
+
+                  const subTraducido = JSON.parse(JSON.stringify(sub)) as Categoria;
+                  if (subNombreTrad) {
+                    subTraducido.nombre = subNombreTrad;
+                  }
+
+                  // Traducir subsubcategorías
+                  if (sub.subcategorias) {
+                    subTraducido.subcategorias = await Promise.all(
+                      sub.subcategorias.map(async (subsub) => {
+                        const subsubTrads = await obtenerTraduccionesPorContenido("categoria", subsub.id, idiomaEdicion);
+                        const subsubNombreTrad = subsubTrads.find(t => t.campo === "nombre")?.valor;
+
+                        const subsubTraducido = JSON.parse(JSON.stringify(subsub)) as Categoria;
+                        if (subsubNombreTrad) {
+                          subsubTraducido.nombre = subsubNombreTrad;
+                        }
+
+                        return subsubTraducido;
+                      })
+                    );
+                  }
+
+                  return subTraducido;
+                })
+              );
+            }
+
+            return catTraducido;
+          })
+        );
+
+        setCategoriasTraducidas(catsConTraducciones);
+      } catch (error) {
+        console.error("Error cargando traducciones de categorías:", error);
+        setCategoriasTraducidas(categorias);
+      }
+    };
+
+    cargarTraducciones();
+  }, [categorias, idiomaEdicion]);
+
   // Notificar cambios
   useEffect(() => {
     if (onCategoriasChange) onCategoriasChange(categorias);
   }, [categorias, onCategoriasChange]);
+
+  const handleIdiomaChange = (nuevoIdioma: string) => {
+    setIdiomaEdicion(nuevoIdioma);
+  };
 
   const agregarCategoria = async () => {
     if (!nuevaCategoria.trim()) return;
@@ -173,34 +255,121 @@ export default function CategoriasAdminPanel({ onCategoriasChange }: { onCategor
   const handleEditarNombre = async (path: number[], newName: string, level: number) => {
     if (!newName.trim()) return;
 
-    setCategorias(prev => {
-      const copy = JSON.parse(JSON.stringify(prev)) as Categoria[];
+    const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+    const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
 
-      if (level === 1) {
-        copy[path[0]].nombre = newName.trim();
-      } else {
-        let pointer = copy;
-        for (let i = 0; i < path.length - 1; i++) {
-          pointer = pointer[path[i]].subcategorias || [];
+    // Obtener la categoría a editar
+    let categoriaEditada: Categoria;
+    if (level === 1) {
+      categoriaEditada = categorias[path[0]];
+    } else {
+      let pointer = categorias;
+      for (let i = 0; i < path.length - 1; i++) {
+        pointer = pointer[path[i]].subcategorias || [];
+      }
+      categoriaEditada = pointer[path[path.length - 1]];
+    }
+
+    // Si es idioma predeterminado, guardar directamente en la categoría
+    if (idiomaEdicion === codigoPredeterminado) {
+      setCategorias(prev => {
+        const copy = JSON.parse(JSON.stringify(prev)) as Categoria[];
+
+        if (level === 1) {
+          copy[path[0]].nombre = newName.trim();
+        } else {
+          let pointer = copy;
+          for (let i = 0; i < path.length - 1; i++) {
+            pointer = pointer[path[i]].subcategorias || [];
+          }
+          pointer[path[path.length - 1]].nombre = newName.trim();
         }
-        pointer[path[path.length - 1]].nombre = newName.trim();
-      }
 
-      // Guardar en Firestore
-      if (level === 1) {
-        guardarCategoria(copy[path[0]]);
-      } else {
-        guardarCategoria(copy[path[0]]);
-      }
+        // Guardar en Firestore
+        if (level === 1) {
+          guardarCategoria(copy[path[0]]);
+        } else {
+          guardarCategoria(copy[path[0]]);
+        }
 
-      return copy;
-    });
+        return copy;
+      });
+    } else {
+      // Si es otro idioma, guardar como traducción
+      try {
+        const trads = await obtenerTraduccionesPorContenido("categoria", categoriaEditada.id, idiomaEdicion);
+        const nombreTrad = trads.find(t => t.campo === "nombre");
+
+        if (nombreTrad) {
+          await actualizarTraduccion(nombreTrad.id!, { valor: newName.trim() });
+        } else {
+          await crearTraduccion({
+            tipo: "categoria",
+            contenidoId: categoriaEditada.id,
+            idiomaCodigo: idiomaEdicion,
+            campo: "nombre",
+            valor: newName.trim()
+          });
+        }
+
+        // Recargar traducciones
+        const catsConTraducciones = await Promise.all(
+          categorias.map(async (cat) => {
+            const trads = await obtenerTraduccionesPorContenido("categoria", cat.id, idiomaEdicion);
+            const nombreTrad = trads.find(t => t.campo === "nombre")?.valor;
+
+            const catTraducido = JSON.parse(JSON.stringify(cat)) as Categoria;
+            if (nombreTrad) {
+              catTraducido.nombre = nombreTrad;
+            }
+
+            if (cat.subcategorias) {
+              catTraducido.subcategorias = await Promise.all(
+                cat.subcategorias.map(async (sub) => {
+                  const subTrads = await obtenerTraduccionesPorContenido("categoria", sub.id, idiomaEdicion);
+                  const subNombreTrad = subTrads.find(t => t.campo === "nombre")?.valor;
+
+                  const subTraducido = JSON.parse(JSON.stringify(sub)) as Categoria;
+                  if (subNombreTrad) {
+                    subTraducido.nombre = subNombreTrad;
+                  }
+
+                  if (sub.subcategorias) {
+                    subTraducido.subcategorias = await Promise.all(
+                      sub.subcategorias.map(async (subsub) => {
+                        const subsubTrads = await obtenerTraduccionesPorContenido("categoria", subsub.id, idiomaEdicion);
+                        const subsubNombreTrad = subsubTrads.find(t => t.campo === "nombre")?.valor;
+
+                        const subsubTraducido = JSON.parse(JSON.stringify(subsub)) as Categoria;
+                        if (subsubNombreTrad) {
+                          subsubTraducido.nombre = subsubNombreTrad;
+                        }
+
+                        return subsubTraducido;
+                      })
+                    );
+                  }
+
+                  return subTraducido;
+                })
+              );
+            }
+
+            return catTraducido;
+          })
+        );
+
+        setCategoriasTraducidas(catsConTraducciones);
+      } catch (error) {
+        console.error("Error guardando traducción de categoría:", error);
+      }
+    }
 
     setEditingPath(null);
     setEditingName("");
   };
 
-  const renderCategorias = (cats: Categoria[], nivel = 1, parentPath: number[] = []): JSX.Element => (
+  const renderCategorias = (cats: Categoria[], nivel = 1, parentPath: number[] = []): React.ReactElement => (
     <ul className={nivel === 1 ? "mb-4 space-y-1" : "mt-2 space-y-1"} style={{ marginLeft: nivel > 1 ? `${(nivel - 1) * 1.5}rem` : 0 }}>
       {cats.map((cat, idx) => {
         const path = [...parentPath, idx];
@@ -336,9 +505,16 @@ export default function CategoriasAdminPanel({ onCategoriasChange }: { onCategor
 
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
-      <h2 className="text-xl font-bold mb-2 text-blue-700">Gestión de Categorías</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xl font-bold text-blue-700">Gestión de Categorías</h2>
+        <TranslationEditor
+          onIdiomaChange={handleIdiomaChange}
+          idiomaActual={idiomaEdicion}
+          soloEdicion={true}
+        />
+      </div>
       <p className="text-sm text-gray-600 mb-4">Arrastra las categorías para reordenarlas. Las subcategorías solo pueden moverse dentro de su categoría padre. Haz clic en el botón ✎ para editar nombres.</p>
-      
+
       <div className="flex gap-2 mb-4 flex-wrap">
         <input
           type="text"
@@ -364,9 +540,9 @@ export default function CategoriasAdminPanel({ onCategoriasChange }: { onCategor
           Agregar
         </button>
       </div>
-      
+
       <div className="border rounded-lg p-4 bg-gray-50">
-        {categorias.length > 0 ? renderCategorias(categorias) : <p className="text-gray-500">No hay categorías. Agrega una nueva.</p>}
+        {categoriasTraducidas.length > 0 ? renderCategorias(categoriasTraducidas) : <p className="text-gray-500">No hay categorías. Agrega una nueva.</p>}
       </div>
     </div>
   );

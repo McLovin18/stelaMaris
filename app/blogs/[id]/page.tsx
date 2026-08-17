@@ -6,11 +6,16 @@ import { redirectIfLoggedIn } from "../../lib/firebase-auth";
 import { getBlogById } from "../../lib/blogs-db";
 import type { Blog } from "../../lib/blog-types";
 import BlogPreview from "../BlogPreview";
+import { useLanguage } from "../../context/LanguageContext";
+import { obtenerTraduccionesPorContenido } from "../../lib/traducciones-db";
 
 export default function BlogDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
+  const { idiomaActual } = useLanguage();
+  const languageCode = idiomaActual?.codigo || "es";
   const [blog, setBlog] = useState<Blog | null>(null);
+  const [translatedBlog, setTranslatedBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
 
 
@@ -24,6 +29,47 @@ export default function BlogDetailPage() {
     }
     load();
   }, [params?.id]);
+
+  // Cargar traducciones cuando cambia el idioma
+  useEffect(() => {
+    const loadTranslations = async () => {
+      if (!blog || !blog.id) return;
+
+      const idiomaPredeterminado = "es";
+
+      if (languageCode === idiomaPredeterminado) {
+        // Si es español, usar el blog original
+        setTranslatedBlog(blog);
+        return;
+      }
+
+      try {
+        const trads = await obtenerTraduccionesPorContenido("blog", blog.id, languageCode);
+
+        if (trads.length === 0) {
+          setTranslatedBlog(blog);
+          return;
+        }
+
+        const blogTraducido = JSON.parse(JSON.stringify(blog));
+
+        trads.forEach(t => {
+          if (t.campo === "title") {
+            blogTraducido.title = t.valor;
+          } else if (t.campo === "description") {
+            blogTraducido.description = t.valor;
+          }
+        });
+
+        setTranslatedBlog(blogTraducido);
+      } catch (error) {
+        console.error("Error cargando traducciones:", error);
+        setTranslatedBlog(blog);
+      }
+    };
+
+    loadTranslations();
+  }, [blog, languageCode]);
 
   return (
     <div
@@ -46,7 +92,7 @@ export default function BlogDetailPage() {
               Cargando artículo...
             </p>
           </div>
-        ) : !blog ? (
+        ) : !translatedBlog ? (
           <div className="text-center py-16">
             <span
               className="material-icons-round text-6xl opacity-30"
@@ -59,7 +105,7 @@ export default function BlogDetailPage() {
             </h2>
           </div>
         ) : (
-          <BlogPreview blog={blog} device="desktop" />
+          <BlogPreview blog={translatedBlog} device="desktop" />
         )}
       </main>
     </div>

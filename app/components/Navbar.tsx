@@ -15,6 +15,8 @@ import { obtenerProductos } from "../lib/productos-db";
 import { useUser } from "../context/UserContext";
 import { productMatches } from "../lib/search-utils";
 import { useUITranslation } from "../hooks/useUITranslation";
+import { useLanguage } from "../context/LanguageContext";
+import { obtenerTraduccionesPorContenido } from "../lib/traducciones-db";
 
 // ─────────────────────────────────────────────
 // Paleta de marca — Tienda Virtual (Rosa/Coral)
@@ -35,8 +37,11 @@ const BRAND = {
 // ─────────────────────────────────────────────
 function MobileCategoriesAccordion({ basePath, t }: { basePath: string; t: (key: string) => string }) {
   const [categorias, setCategorias] = React.useState<any[]>([]);
+  const [categoriasTraducidas, setCategoriasTraducidas] = React.useState<any[]>([]);
   const [openCat, setOpenCat] = React.useState<string | null>(null);
   const [openSub, setOpenSub] = React.useState<string | null>(null);
+  const { idiomaActual } = useLanguage();
+  const languageCode = idiomaActual?.codigo || "es";
 
   React.useEffect(() => {
     const unsub = onSnapshot(collection(db, "categorias"), (snap) => {
@@ -45,13 +50,80 @@ function MobileCategoriesAccordion({ basePath, t }: { basePath: string; t: (key:
     return () => unsub();
   }, []);
 
+  // Cargar traducciones de categorías cuando cambia el idioma
+  React.useEffect(() => {
+    const cargarTraducciones = async () => {
+      if (languageCode === "es") {
+        setCategoriasTraducidas(categorias);
+        return;
+      }
+
+      try {
+        const catsConTraducciones = await Promise.all(
+          categorias.map(async (cat) => {
+            const trads = await obtenerTraduccionesPorContenido("categoria", cat.id, languageCode);
+            const nombreTrad = trads.find(t => t.campo === "nombre")?.valor;
+
+            const catTraducido = JSON.parse(JSON.stringify(cat));
+            if (nombreTrad) {
+              catTraducido.nombre = nombreTrad;
+            }
+
+            // Traducir subcategorías recursivamente
+            if (cat.subcategorias) {
+              catTraducido.subcategorias = await Promise.all(
+                cat.subcategorias.map(async (sub) => {
+                  const subTrads = await obtenerTraduccionesPorContenido("categoria", sub.id, languageCode);
+                  const subNombreTrad = subTrads.find(t => t.campo === "nombre")?.valor;
+
+                  const subTraducido = JSON.parse(JSON.stringify(sub));
+                  if (subNombreTrad) {
+                    subTraducido.nombre = subNombreTrad;
+                  }
+
+                  // Traducir subsubcategorías
+                  if (sub.subcategorias) {
+                    subTraducido.subcategorias = await Promise.all(
+                      sub.subcategorias.map(async (subsub) => {
+                        const subsubTrads = await obtenerTraduccionesPorContenido("categoria", subsub.id, languageCode);
+                        const subsubNombreTrad = subsubTrads.find(t => t.campo === "nombre")?.valor;
+
+                        const subsubTraducido = JSON.parse(JSON.stringify(subsub));
+                        if (subsubNombreTrad) {
+                          subsubTraducido.nombre = subsubNombreTrad;
+                        }
+
+                        return subsubTraducido;
+                      })
+                    );
+                  }
+
+                  return subTraducido;
+                })
+              );
+            }
+
+            return catTraducido;
+          })
+        );
+
+        setCategoriasTraducidas(catsConTraducciones);
+      } catch (error) {
+        console.error("Error cargando traducciones de categorías:", error);
+        setCategoriasTraducidas(categorias);
+      }
+    };
+
+    cargarTraducciones();
+  }, [categorias, languageCode]);
+
   return (
     <div className="flex flex-col gap-1 my-3">
       <p className="text-xs font-semibold uppercase tracking-wider px-2 mb-1"
         style={{ color: BRAND.textMuted }}>
         {t("nav.categories")}
       </p>
-      {categorias.map((cat) => (
+      {categoriasTraducidas.map((cat) => (
         <div key={cat.id}>
           <button
             className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
@@ -167,6 +239,8 @@ export const Navbar = () => {
   const [openSubId, setOpenSubId] = useState<string | null>(null);
   const { user, carrito } = useUser();
   const { t } = useUITranslation();
+  const { idiomaActual } = useLanguage();
+  const languageCode = idiomaActual?.codigo || "es";
   const [windowWidth, setWindowWidth] = useState<number | null>(null);
 
   // Barra de búsqueda
@@ -179,6 +253,7 @@ export const Navbar = () => {
 
   // Categorías integradas
   const [categorias, setCategorias] = useState<any[]>([]);
+  const [categoriasTraducidas, setCategoriasTraducidas] = useState<any[]>([]);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -197,7 +272,75 @@ export const Navbar = () => {
     document.documentElement.classList.remove("dark");
   }, []);
 
+  // Cargar traducciones de categorías cuando cambia el idioma
   useEffect(() => {
+    const cargarTraducciones = async () => {
+      if (languageCode === "es") {
+        setCategoriasTraducidas(categorias);
+        return;
+      }
+
+      try {
+        const catsConTraducciones = await Promise.all(
+          categorias.map(async (cat) => {
+            const trads = await obtenerTraduccionesPorContenido("categoria", cat.id, languageCode);
+            const nombreTrad = trads.find(t => t.campo === "nombre")?.valor;
+
+            const catTraducido = JSON.parse(JSON.stringify(cat));
+            if (nombreTrad) {
+              catTraducido.nombre = nombreTrad;
+            }
+
+            // Traducir subcategorías recursivamente
+            if (cat.subcategorias) {
+              catTraducido.subcategorias = await Promise.all(
+                cat.subcategorias.map(async (sub) => {
+                  const subTrads = await obtenerTraduccionesPorContenido("categoria", sub.id, languageCode);
+                  const subNombreTrad = subTrads.find(t => t.campo === "nombre")?.valor;
+
+                  const subTraducido = JSON.parse(JSON.stringify(sub));
+                  if (subNombreTrad) {
+                    subTraducido.nombre = subNombreTrad;
+                  }
+
+                  // Traducir subsubcategorías
+                  if (sub.subcategorias) {
+                    subTraducido.subcategorias = await Promise.all(
+                      sub.subcategorias.map(async (subsub) => {
+                        const subsubTrads = await obtenerTraduccionesPorContenido("categoria", subsub.id, languageCode);
+                        const subsubNombreTrad = subsubTrads.find(t => t.campo === "nombre")?.valor;
+
+                        const subsubTraducido = JSON.parse(JSON.stringify(subsub));
+                        if (subsubNombreTrad) {
+                          subsubTraducido.nombre = subsubNombreTrad;
+                        }
+
+                        return subsubTraducido;
+                      })
+                    );
+                  }
+
+                  return subTraducido;
+                })
+              );
+            }
+
+            return catTraducido;
+          })
+        );
+
+        setCategoriasTraducidas(catsConTraducciones);
+      } catch (error) {
+        console.error("Error cargando traducciones de categorías:", error);
+        setCategoriasTraducidas(categorias);
+      }
+    };
+
+    cargarTraducciones();
+  }, [categorias, languageCode]);
+
+  useEffect(() => {
+    // ...
     if (searchOpen) {
       searchInputRef.current?.focus();
     }
@@ -307,14 +450,13 @@ export const Navbar = () => {
           <div className="absolute inset-y-0 left-1/2 transform -translate-x-1/2 flex items-center pointer-events-none">
             <a
               href={user ? "/admin" : "/"}
-              className="flex items-center gap-2 shrink-0 text-white pointer-events-auto"
+              className="flex items-center shrink-0 pointer-events-auto"
             >
-              <span
-                className="font-heading whitespace-nowrap text-xl sm:text-2xl"
-                style={{ letterSpacing: "0.12em", color: BRAND.white }}
-              >
-                STELLA MARIS <span style={{ color: BRAND.gold }}></span>
-              </span>
+              <img
+                src="/logo_stella.png"
+                alt="Stella Maris"
+                className="h-12 sm:h-14 w-auto object-contain"
+              />
             </a>
           </div>
 
@@ -501,7 +643,7 @@ export const Navbar = () => {
 
         <div className="hidden items-center justify-center gap-1 px-6 border-t flex-wrap" style={{ borderColor: BRAND.border }}>
           {/* Categorías dinámicas */}
-          {categorias.map((cat) => (
+          {categoriasTraducidas.map((cat) => (
             <div
               key={cat.id}
               className="relative group shrink-0"
@@ -629,12 +771,11 @@ export const Navbar = () => {
               className="flex items-center justify-between px-5 py-4 border-b"
               style={{ borderColor: BRAND.border }}
             >
-              <span
-                className="font-bold text-base"
-                style={{ color: BRAND.white, letterSpacing: "0.08em" }}
-              >
-                STELLA MARIS <span style={{ color: BRAND.gold }}></span>
-              </span>
+              <img
+                src="/logo_stella.png"
+                alt="Stella Maris"
+                className="h-12 w-auto object-contain"
+              />
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-1.5 rounded-xl transition-colors"
@@ -737,6 +878,52 @@ export const Navbar = () => {
                   {link.label}
                 </a>
               ))}
+
+              {/* Botones de contenido de marca */}
+              <div className="border-t my-2" style={{ borderColor: BRAND.border }}>
+                <p className="text-xs font-semibold uppercase tracking-wider px-2 mb-2"
+                  style={{ color: BRAND.textMuted }}>
+                  {t("footer.brand_content")}
+                </p>
+                <div className="flex flex-col gap-1">
+                  <a
+                    href="/blogs/t5yqfmz8jFgoXuhegNhR"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                    style={{ color: BRAND.white }}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <span className="material-icons-round text-base">visibility</span>
+                    {t("footer.visibility")}
+                  </a>
+                  <a
+                    href="/blogs/X0Rf1ZCsohI4StsJr521"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                    style={{ color: BRAND.white }}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <span className="material-icons-round text-base">auto_awesome</span>
+                    {t("footer.philosophy")}
+                  </a>
+                  <a
+                    href="/blogs/mdAXoWNRHP0Tk4MywpeA"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                    style={{ color: BRAND.white }}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <span className="material-icons-round text-base">history</span>
+                    {t("footer.history")}
+                  </a>
+                  <a
+                    href="/blogs"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                    style={{ color: BRAND.white }}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <span className="material-icons-round text-base">groups</span>
+                    Comunidad
+                  </a>
+                </div>
+              </div>
 
               {/* Categorías en acordeón */}
               <MobileCategoriesAccordion basePath={basePath} t={t} />

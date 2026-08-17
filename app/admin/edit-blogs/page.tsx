@@ -17,13 +17,18 @@ import {
 } from "../../lib/blogs-db";
 import { uploadImageAndGetUrl } from "../../lib/upload-image";
 import BlogPreview from "../../blogs/BlogPreview";
+import { TranslationEditor } from "../../components/TranslationEditor";
+import { obtenerIdiomas } from "../../lib/idiomas-db";
+import { obtenerTraduccionesPorContenido, crearTraduccion, actualizarTraduccion } from "../../lib/traducciones-db";
+import { normalizeTranslation, getText } from "../../lib/translations";
+import { useLanguage } from "../../context/LanguageContext";
 
 type EditableBlog = Partial<Blog> & { id?: string };
 
 function createEmptyBlog(): EditableBlog {
 	return {
-		title: "",
-		description: "",
+		title: { es: "" },
+		description: { es: "" },
 		blocks: [],
 		status: "draft",
 		featured: false,
@@ -58,12 +63,29 @@ export default function AdminEditBlogsPage() {
 	const [uploadingBlockId, setUploadingBlockId] = useState<string | null>(null);
 	const [draggedBlockIndex, setDraggedBlockIndex] = useState<number | null>(null);
 	const [draggedBlogIndex, setDraggedBlogIndex] = useState<number | null>(null);
+	const [idiomasDisponibles, setIdiomasDisponibles] = useState<any[]>([]);
+	const [idiomaEdicion, setIdiomaEdicion] = useState<string>("es");
+	const { idiomaActual } = useLanguage();
+
+	// Estado para los valores originales (siempre en español, inmutables)
+	const [valoresOriginales, setValoresOriginales] = useState({
+		title: "",
+		description: "",
+	});
+
+	// Estado para los valores que se muestran en los campos (cambian según idioma)
+	const [title, setTitle] = useState<string>("");
+	const [description, setDescription] = useState<string>("");
 
 	useEffect(() => {
 		async function load() {
 			setLoading(true);
-			const all = await getAllBlogsAdmin();
+			const [all, idiomas] = await Promise.all([
+				getAllBlogsAdmin(),
+				obtenerIdiomas()
+			]);
 			setBlogs(all);
+			setIdiomasDisponibles(idiomas);
 			if (all.length > 0) {
 				setSelectedId(all[0].id);
 				setEditingBlog(all[0]);
@@ -88,10 +110,71 @@ export default function AdminEditBlogsPage() {
 
 	const updateEditingField = (
 		field: keyof EditableBlog,
-		value: string | boolean | "draft" | "published"
+		value: string | boolean | "draft" | "published" | any
 	) => {
 		setEditingBlog((prev) => (prev ? { ...prev, [field]: value } : prev));
 	};
+
+	const handleIdiomaChange = (nuevoIdioma: string) => {
+		setIdiomaEdicion(nuevoIdioma);
+	};
+
+	// Efecto para establecer valores originales cuando carga el blog
+	useEffect(() => {
+		if (editingBlog?.id) {
+			const titleStr = getText(editingBlog.title, "es", editingBlog.title as string);
+			const descriptionStr = getText(editingBlog.description, "es", editingBlog.description as string);
+
+			setValoresOriginales({
+				title: titleStr,
+				description: descriptionStr,
+			});
+			// Inicializar campos con valores originales (español)
+			setTitle(titleStr);
+			setDescription(descriptionStr);
+		} else if (!editingBlog?.id) {
+			// Si es creación nueva, inicializar en blanco
+			setValoresOriginales({
+				title: "",
+				description: "",
+			});
+			setTitle("");
+			setDescription("");
+		}
+	}, [editingBlog?.id, editingBlog?.title, editingBlog?.description]);
+
+	// Efecto para cargar traducciones cuando cambia el idioma de edición
+	useEffect(() => {
+		if (!editingBlog?.id) return;
+
+		const cargarTraducciones = async () => {
+			const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+			const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
+
+			if (idiomaEdicion === codigoPredeterminado) {
+				// Si estamos en el idioma predeterminado, usar el contenido original
+				setTitle(valoresOriginales.title);
+				setDescription(valoresOriginales.description);
+			} else {
+				// Si estamos en otro idioma, cargar la traducción
+				try {
+					const traducciones = await obtenerTraduccionesPorContenido("blog", editingBlog.id!, idiomaEdicion);
+					const titleTraduccion = traducciones.find(t => t.campo === "title")?.valor;
+					const descriptionTraduccion = traducciones.find(t => t.campo === "description")?.valor;
+
+					setTitle(titleTraduccion || valoresOriginales.title);
+					setDescription(descriptionTraduccion || valoresOriginales.description);
+				} catch (error) {
+					console.error("Error cargando traducciones:", error);
+					// En caso de error, usar el contenido original
+					setTitle(valoresOriginales.title);
+					setDescription(valoresOriginales.description);
+				}
+			}
+		};
+
+		cargarTraducciones();
+	}, [idiomaEdicion, editingBlog?.id]);
 
 	const updateBlock = (index: number, updater: (block: BlogBlock) => BlogBlock) => {
 		setEditingBlog((prev) => {
@@ -289,27 +372,77 @@ export default function AdminEditBlogsPage() {
 	const handleSave = async (statusOverride?: "draft" | "published") => {
 		if (!editingBlog) return;
 		setSaving(true);
-		const payload: EditableBlog = {
-			id: editingBlog.id,
-			title: editingBlog.title || "",
-			description: editingBlog.description || "",
-			blocks: (editingBlog.blocks as BlogBlock[]) || [],
-			status: statusOverride || (editingBlog.status as any) || "draft",
-			featured: editingBlog.featured || false,
-		};
 
-		const saved = await saveBlog(payload as any);
+		const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+		const codigoPredeterminado = idiomaPredeterminado?.codigo || "es";
 
-		setBlogs((prev) => {
-			const exists = prev.some((b) => b.id === saved.id);
-			if (exists) {
-				return prev.map((b) => (b.id === saved.id ? saved : b));
+		// Si es el idioma predeterminado, guardar el contenido directamente
+		if (idiomaEdicion === codigoPredeterminado) {
+			const payload: EditableBlog = {
+				id: editingBlog.id,
+				title: title,
+				description: description,
+				blocks: (editingBlog.blocks as BlogBlock[]) || [],
+				status: statusOverride || (editingBlog.status as any) || "draft",
+				featured: editingBlog.featured || false,
+			};
+
+			const saved = await saveBlog(payload as any);
+
+			// Actualizar valores originales después de guardar
+			setValoresOriginales({
+				title: title,
+				description: description,
+			});
+
+			setBlogs((prev) => {
+				const exists = prev.some((b) => b.id === saved.id);
+				if (exists) {
+					return prev.map((b) => (b.id === saved.id ? saved : b));
+				}
+				return [saved, ...prev];
+			});
+
+			setSelectedId(saved.id);
+			setEditingBlog(saved);
+		} else {
+			// Si es otro idioma, guardar la traducción
+			if (editingBlog.id) {
+				try {
+					// Guardar traducción de title (siempre guardar, no solo si es diferente)
+					const tradExistente = await obtenerTraduccionesPorContenido("blog", editingBlog.id, idiomaEdicion);
+					const titleTrad = tradExistente.find(t => t.campo === "title");
+					if (titleTrad) {
+						await actualizarTraduccion(titleTrad.id!, { valor: title });
+					} else {
+						await crearTraduccion({
+							tipo: "blog",
+							contenidoId: editingBlog.id,
+							idiomaCodigo: idiomaEdicion,
+							campo: "title",
+							valor: title
+						});
+					}
+
+					// Guardar traducción de description (siempre guardar, no solo si es diferente)
+					const descTrad = tradExistente.find(t => t.campo === "description");
+					if (descTrad) {
+						await actualizarTraduccion(descTrad.id!, { valor: description });
+					} else {
+						await crearTraduccion({
+							tipo: "blog",
+							contenidoId: editingBlog.id,
+							idiomaCodigo: idiomaEdicion,
+							campo: "description",
+							valor: description
+						});
+					}
+				} catch (error) {
+					console.error("Error guardando traducciones:", error);
+				}
 			}
-			return [saved, ...prev];
-		});
+		}
 
-		setSelectedId(saved.id);
-		setEditingBlog(saved);
 		setSaving(false);
 	};
 
@@ -415,7 +548,7 @@ export default function AdminEditBlogsPage() {
 											<div className="flex-1 min-w-0">
 												<div className="flex items-center gap-2">
 													<span className="truncate font-medium">
-														{b.title || "(Sin título)"}
+														{getText(b.title, "es") || "(Sin título)"}
 													</span>
 													{b.featured && (
 														<span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 px-2 py-0.5 text-[11px] font-semibold">
@@ -461,6 +594,14 @@ export default function AdminEditBlogsPage() {
 								</p>
 							) : (
 								<>
+									<div className="flex items-center justify-between mb-4">
+										<h2 className="text-lg font-semibold">Editor de blog</h2>
+										<TranslationEditor
+											onIdiomaChange={handleIdiomaChange}
+											idiomaActual={idiomaEdicion}
+											soloEdicion={true}
+										/>
+									</div>
 									<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 										<div className="flex-1 min-w-0">
 											<label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
@@ -468,8 +609,8 @@ export default function AdminEditBlogsPage() {
 											</label>
 											<input
 												type="text"
-												value={editingBlog.title || ""}
-												onChange={(e) => updateEditingField("title", e.target.value)}
+												value={title}
+												onChange={(e) => setTitle(e.target.value)}
 												className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
 												placeholder="Ej. Novedades en tecnología para este mes"
 											/>
@@ -502,8 +643,8 @@ export default function AdminEditBlogsPage() {
 											Descripción corta (se muestra en la lista de artículos)
 										</label>
 										<textarea
-											value={editingBlog.description || ""}
-											onChange={(e) => updateEditingField("description", e.target.value)}
+											value={description}
+											onChange={(e) => setDescription(e.target.value)}
 											className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm min-h-[60px]"
 											placeholder="Resumen breve del contenido del blog."
 										/>
@@ -604,7 +745,7 @@ export default function AdminEditBlogsPage() {
 															<input
 																type="text"
 																className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
-																value={block.text}
+																value={typeof block.text === 'string' ? block.text : (getText(block.text, idiomaEdicion) as string)}
 																onChange={(e) =>
 																	updateBlock(index, (b) => ({
 																		...(b as any),
@@ -679,7 +820,7 @@ export default function AdminEditBlogsPage() {
 														<div className="space-y-2">
 															<textarea
 																className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm min-h-[90px]"
-																value={block.text}
+																value={typeof block.text === 'string' ? block.text : (getText(block.text, idiomaEdicion) as string)}
 																onChange={(e) =>
 																	updateBlock(index, (b) => ({
 																		...(b as any),
@@ -824,26 +965,28 @@ export default function AdminEditBlogsPage() {
 																	<input
 																		type="text"
 																		className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
-																		value={block.alt || ""}
+																		value={typeof block.alt === 'string' ? block.alt : (getText(block.alt, idiomaEdicion) as string)}
 																		onChange={(e) =>
 																			updateBlock(index, (b) => ({
 																				...(b as any),
 																				alt: e.target.value,
 																			}))
 																		}
+																		placeholder="Texto alternativo"
 																	/>
 																	<label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2">
 																		Leyenda (se muestra debajo de la imagen)
 																	</label>
 																	<textarea
 																		className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm min-h-[60px]"
-																		value={block.caption || ""}
+																		value={typeof block.caption === 'string' ? block.caption : (getText(block.caption, idiomaEdicion) as string)}
 																		onChange={(e) =>
 																			updateBlock(index, (b) => ({
 																				...(b as any),
 																				caption: e.target.value,
 																			}))
 																		}
+																		placeholder="Leyenda de la imagen"
 																	/>
 																</div>
 															</div>
@@ -861,14 +1004,16 @@ export default function AdminEditBlogsPage() {
 									</div>
 
 									<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-3 border-t border-slate-200 dark:border-slate-700 mt-2">
-										<div className="text-xs text-slate-500 dark:text-slate-400">
-											Estado actual:{" "}
-											<span className="font-semibold text-slate-700 dark:text-slate-200">
-												{editingBlog.status === "published"
-													? "Publicado"
-													: "Borrador (sin publicar)"}
-											</span>
-										</div>
+										{editingBlog && (
+											<div className="text-xs text-slate-500 dark:text-slate-400">
+												Estado actual:{" "}
+												<span className="font-semibold text-slate-700 dark:text-slate-200">
+													{editingBlog.status === "published"
+														? "Publicado"
+														: "Borrador (sin publicar)"}
+												</span>
+											</div>
+										)}
 										<div className="flex flex-wrap gap-2 justify-end">
 											<button
 												type="button"
@@ -894,18 +1039,6 @@ export default function AdminEditBlogsPage() {
 							)}
 						</div>
 					</section>
-
-					{/* Editor de traducciones para blogs */}
-					{editingBlog.id && (
-						<TranslationEditor
-							tipo="blog"
-							contenidoId={editingBlog.id}
-							campos={[
-								{ key: "title", label: "Título del blog", valorOriginal: editingBlog.title || "" },
-								{ key: "description", label: "Descripción", valorOriginal: editingBlog.description || "" },
-							]}
-						/>
-					)}
 
 					{/* Previsualización */}
 					<section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 md:p-5 flex flex-col min-h-[360px]">

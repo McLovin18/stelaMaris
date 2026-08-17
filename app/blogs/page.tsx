@@ -9,6 +9,7 @@ import type { Blog } from "../lib/blog-types";
 import BottomBarPublic from "../components/BottomBarPublic";
 import { useLanguage } from "../context/LanguageContext";
 import { getText } from "../lib/translations";
+import { obtenerTraduccionesPorContenido } from "../lib/traducciones-db";
 
 export default function BlogsPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function BlogsPage() {
   const { idiomaActual } = useLanguage();
   const languageCode = idiomaActual?.codigo || "es";
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [translatedBlogs, setTranslatedBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,8 +30,57 @@ export default function BlogsPage() {
     load();
   }, []);
 
-  const featured = blogs.find((b) => b.featured);
-  const others = blogs.filter((b) => !b.featured);
+  // Cargar traducciones cuando cambia el idioma
+  useEffect(() => {
+    const loadTranslations = async () => {
+      if (!blogs || blogs.length === 0) return;
+
+      const idiomaPredeterminado = "es";
+
+      if (languageCode === idiomaPredeterminado) {
+        // Si es español, usar los blogs originales
+        setTranslatedBlogs(blogs);
+        return;
+      }
+
+      try {
+        const blogsTrads = await Promise.all(
+          blogs.map(async (blog) => {
+            if (!blog.id) return { blogId: blog.id, traducciones: [] };
+            const trads = await obtenerTraduccionesPorContenido("blog", blog.id, languageCode);
+            return { blogId: blog.id, traducciones: trads };
+          })
+        );
+
+        const blogsFinal = blogs.map(blog => {
+          const trads = blogsTrads.find(t => t.blogId === blog.id)?.traducciones || [];
+          if (trads.length === 0) return blog;
+
+          const blogTraducido = JSON.parse(JSON.stringify(blog));
+
+          trads.forEach(t => {
+            if (t.campo === "title") {
+              blogTraducido.title = t.valor;
+            } else if (t.campo === "description") {
+              blogTraducido.description = t.valor;
+            }
+          });
+
+          return blogTraducido;
+        });
+
+        setTranslatedBlogs(blogsFinal);
+      } catch (error) {
+        console.error("Error cargando traducciones:", error);
+        setTranslatedBlogs(blogs);
+      }
+    };
+
+    loadTranslations();
+  }, [blogs, languageCode]);
+
+  const featured = translatedBlogs.find((b) => b.featured);
+  const others = translatedBlogs.filter((b) => !b.featured);
 
   return (
     <div
