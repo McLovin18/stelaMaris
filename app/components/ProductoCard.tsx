@@ -149,7 +149,7 @@ const cardStyles = `
 
   /* ── barra info inferior — estilo imagen: negro total ── */
   .pc-info {
-    background: #CF1F6A;
+    background: #f28d86;
     color: #FFFFFF;
     padding: 10px 12px 12px;
     display: flex;
