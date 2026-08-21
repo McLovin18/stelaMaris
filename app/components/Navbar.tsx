@@ -572,7 +572,7 @@ export const Navbar = () => {
                 {carrito && carrito.length > 0 && (
                   <span
                     className="absolute -top-2 -right-2 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 z-10"
-                    style={{ background: BRAND.gold, color: "#0d0d0d", borderColor: BRAND.bg }}
+                    style={{ background: BRAND.gold, color: "white", borderColor: BRAND.bg }}
                   >
                     {carrito.length}
                   </span>
@@ -914,13 +914,13 @@ export const Navbar = () => {
                     {t("footer.history")}
                   </a>
                   <a
-                    href="/blogs"
+                    href="/blogs/8ZKCpeeM2d37oaC0wBYB"
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
                     style={{ color: BRAND.white }}
                     onClick={() => setMobileOpen(false)}
                   >
                     <span className="material-icons-round text-base">groups</span>
-                    Comunidad
+                    {t("footer.community")}
                   </a>
                 </div>
               </div>

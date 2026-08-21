@@ -132,7 +132,7 @@ export default function BlogsPage() {
                   className="w-full text-left rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition flex flex-col md:flex-row"
                 >
                   {featured.blocks?.some((b) => b.type === "image") && (
-                    <div className="w-full md:w-1/3 h-48 md:h-auto flex-shrink-0">
+                    <div className="w-full md:w-1/3 aspect-square md:aspect-[4/5] flex-shrink-0">
                       {featured.blocks
                         .find((b) => b.type === "image")
                         ?.type === "image" && (
@@ -184,7 +184,7 @@ export default function BlogsPage() {
                         className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden shadow-sm flex flex-col cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition"
                       >
                         {imageBlock && imageBlock.type === "image" && (
-                          <div className="w-full h-40 overflow-hidden">
+                          <div className="w-full aspect-[4/5] overflow-hidden">
                             <img
                               src={imageBlock.url}
                               alt={getText(imageBlock.alt, languageCode, imageBlock.alt as string) || getText(b.title, languageCode, b.title as string)}

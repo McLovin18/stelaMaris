@@ -27,8 +27,8 @@ type EditableBlog = Partial<Blog> & { id?: string };
 
 function createEmptyBlog(): EditableBlog {
 	return {
-		title: { es: "" },
-		description: { es: "" },
+		title: "",
+		description: "",
 		blocks: [],
 		status: "draft",
 		featured: false,
@@ -101,6 +101,9 @@ export default function AdminEditBlogsPage() {
 	const handleSelectBlog = (blog: Blog) => {
 		setSelectedId(blog.id);
 		setEditingBlog(blog);
+		// Establecer idioma de edición al predeterminado
+		const idiomaPredeterminado = idiomasDisponibles.find(id => id.esPredeterminado);
+		setIdiomaEdicion(idiomaPredeterminado?.codigo || "es");
 	};
 
 	const handleNewBlog = () => {
@@ -143,7 +146,7 @@ export default function AdminEditBlogsPage() {
 		}
 	}, [editingBlog?.id, editingBlog?.title, editingBlog?.description]);
 
-	// Efecto para cargar traducciones cuando cambia el idioma de edición
+	// Efecto para cargar traducciones cuando cambia el idioma de edición o cuando se carga un blog
 	useEffect(() => {
 		if (!editingBlog?.id) return;
 
@@ -174,7 +177,7 @@ export default function AdminEditBlogsPage() {
 		};
 
 		cargarTraducciones();
-	}, [idiomaEdicion, editingBlog?.id]);
+	}, [idiomaEdicion, editingBlog?.id, valoresOriginales]);
 
 	const updateBlock = (index: number, updater: (block: BlogBlock) => BlogBlock) => {
 		setEditingBlog((prev) => {
