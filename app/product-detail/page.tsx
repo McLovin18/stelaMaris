@@ -599,7 +599,7 @@ export default function ProductDetailPage({ params }) {
             {/* Campos de personalización */}
             {(producto as any)?.personalizado && (producto as any)?.camposPersonalizacion && (producto as any).camposPersonalizacion.length > 0 && (
               <div className="mt-6 rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--bgSecondary)" }}>
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: "#92400e" }}>
+                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: "#f6a794" }}>
                   <span className="material-icons-round text-base">auto_awesome</span>
                   Personalización
                 </h3>

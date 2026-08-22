@@ -147,9 +147,9 @@ const cardStyles = `
     transform: scale(1);
   }
 
-  /* ── barra info inferior — estilo imagen: negro total ── */
+  /* ── barra info inferior — estilo coral fuerte ── */
   .pc-info {
-    background: #f28d86;
+    background: #f6a794;
     color: #FFFFFF;
     padding: 10px 12px 12px;
     display: flex;

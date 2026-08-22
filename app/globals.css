@@ -15,14 +15,14 @@
   /* --- Colores base de la paleta (para uso directo si se necesita) --- */
   --color-background: #FFF0F4;
   --color-primary: #f6a794;  /* rosa coral suave para navbar/footer/info producto */
-  --color-border: #C86581;
-  --color-button: #BD1C33;   /* rojo Barbie para botones */
-  --color-active: #D787B8;
+  --color-border: #e88871;
+  --color-button: #db7156;   /* coral fuerte para botones */
+  --color-active: #e3795e;
   --color-text: #1a1a1a;
 
   /* --- Variantes derivadas (hover / active) --- */
   --color-primary-dark: #b03870;    /* rosa coral suave oscurecido, hover en navbar/footer */
-  --color-button-dark: #8f1526;     /* rojo Barbie oscurecido, hover en botones */
+  --color-button-dark: #c9765f;     /* coral fuerte oscurecido, hover en botones */
   --color-background-dark: #f0d4e0; /* coral muy claro oscurecido, hover sobre fondos */
 
   /* --- Semántica --- */

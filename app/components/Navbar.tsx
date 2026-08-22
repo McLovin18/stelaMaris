@@ -32,6 +32,37 @@ const BRAND = {
   textMuted: "color-mix(in srgb, var(--text) 80%, transparent)",
 };
 
+// Coral de referencia (fondo del navbar). Se usa como acento del dropdown
+// "Sobre Nosotros" para que quede coherente con el tono principal de la marca.
+const CORAL = "#F6A794";
+const CORAL_DARK = "#E88871";
+
+// ─────────────────────────────────────────────
+// Contenido de "Sobre Nosotros" (desktop dropdown + mobile accordion comparten estos items)
+// ─────────────────────────────────────────────
+const SOBRE_NOSOTROS_ITEMS = [
+  {
+    href: "/blogs/mdAXoWNRHP0Tk4MywpeA",
+    icon: "history",
+    labelKey: "footer.history",
+  },
+  {
+    href: "/blogs/t5yqfmz8jFgoXuhegNhR",
+    icon: "visibility",
+    labelKey: "footer.visibility",
+  },
+  {
+    href: "/blogs/8ZKCpeeM2d37oaC0wBYB",
+    icon: "groups",
+    labelKey: "footer.community",
+  },
+  {
+    href: "/blogs/X0Rf1ZCsohI4StsJr521",
+    icon: "auto_awesome",
+    labelKey: "footer.philosophy",
+  },
+];
+
 // ─────────────────────────────────────────────
 // Acordeón de categorías para el drawer móvil
 // ─────────────────────────────────────────────
@@ -237,6 +268,8 @@ export const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [openCatId, setOpenCatId] = useState<string | null>(null);
   const [openSubId, setOpenSubId] = useState<string | null>(null);
+  const [sobreNosotrosOpen, setSobreNosotrosOpen] = useState(false);
+  const sobreNosotrosRef = useRef<HTMLDivElement | null>(null);
   const { user, carrito } = useUser();
   const { t } = useUITranslation();
   const { idiomaActual } = useLanguage();
@@ -360,6 +393,21 @@ export const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [searchOpen]);
 
+  // Cierra el dropdown "Sobre Nosotros" al hacer click fuera de él
+  useEffect(() => {
+    const handleClickOutsideSobreNosotros = (e: MouseEvent) => {
+      if (
+        sobreNosotrosOpen &&
+        sobreNosotrosRef.current &&
+        !sobreNosotrosRef.current.contains(e.target as Node)
+      ) {
+        setSobreNosotrosOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutsideSobreNosotros);
+    return () => document.removeEventListener("mousedown", handleClickOutsideSobreNosotros);
+  }, [sobreNosotrosOpen]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setWindowWidth(window.innerWidth);
@@ -443,6 +491,102 @@ export const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+
+              {/* ── Sobre Nosotros: botón + dropdown (hover o click) ── */}
+              <div
+                ref={sobreNosotrosRef}
+                className="relative"
+                onMouseEnter={() => windowWidth !== null && windowWidth >= 1024 && setSobreNosotrosOpen(true)}
+                onMouseLeave={() => windowWidth !== null && windowWidth >= 1024 && setSobreNosotrosOpen(false)}
+              >
+                <button
+                  type="button"
+                  onClick={() => setSobreNosotrosOpen((prev) => !prev)}
+                  className="relative flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-white transition-colors whitespace-nowrap text-body"
+                  style={{
+                    background: sobreNosotrosOpen ? `color-mix(in srgb, ${CORAL} 35%, transparent)` : "transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!sobreNosotrosOpen) e.currentTarget.style.background = `color-mix(in srgb, ${CORAL} 22%, transparent)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!sobreNosotrosOpen) e.currentTarget.style.background = "transparent";
+                  }}
+                  aria-expanded={sobreNosotrosOpen}
+                >
+                  {t("nav.about_us")}
+                  <span
+                    className="material-icons-round text-white transition-transform duration-200"
+                    style={{ fontSize: 16, transform: sobreNosotrosOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                  >
+                    arrow_drop_down
+                  </span>
+                  {/* Línea de acento coral bajo el botón */}
+                  <span
+                    className="absolute left-3 right-3 -bottom-[1px] h-[2px] rounded-full transition-transform duration-200 origin-left"
+                    style={{
+                      background: CORAL,
+                      transform: sobreNosotrosOpen ? "scaleX(1)" : "scaleX(0)",
+                    }}
+                  />
+                </button>
+
+                {/* Dropdown */}
+                <div
+                  className="absolute left-0 top-full pt-3 min-w-64 z-50"
+                  style={{
+                    opacity: sobreNosotrosOpen ? 1 : 0,
+                    pointerEvents: sobreNosotrosOpen ? "auto" : "none",
+                    transform: sobreNosotrosOpen ? "translateY(0)" : "translateY(-8px)",
+                    transition: "opacity 200ms ease, transform 200ms ease",
+                  }}
+                >
+                  <div
+                    className="rounded-2xl shadow-2xl overflow-hidden"
+                    style={{
+                      background: "#ffffff",
+                      border: `1px solid color-mix(in srgb, ${CORAL} 35%, transparent)`,
+                      boxShadow: `0 20px 40px -12px color-mix(in srgb, ${CORAL_DARK} 35%, transparent)`,
+                    }}
+                  >
+                    {/* Franja superior coral, referencia directa al fondo del navbar */}
+                    <div
+                      className="h-1.5 w-full"
+                      style={{ background: `linear-gradient(90deg, ${CORAL}, ${CORAL_DARK})` }}
+                    />
+                    <div className="py-2">
+                      {SOBRE_NOSOTROS_ITEMS.map((item) => (
+                        <a
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setSobreNosotrosOpen(false)}
+                          className="group/item flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                          style={{ color: "#3a2620" }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = `color-mix(in srgb, ${CORAL} 14%, transparent)`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "transparent";
+                          }}
+                        >
+                          <span
+                            className="flex items-center justify-center w-8 h-8 rounded-xl shrink-0 transition-transform duration-200 group-hover/item:scale-110"
+                            style={{ background: CORAL }}
+                          >
+                            <span
+                              className="material-icons-round"
+                              style={{ fontSize: 17, color: "#ffffff" }}
+                            >
+                              {item.icon}
+                            </span>
+                          </span>
+                          <span className="font-medium">{t(item.labelKey)}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -886,42 +1030,18 @@ export const Navbar = () => {
                   {t("footer.brand_content")}
                 </p>
                 <div className="flex flex-col gap-1">
-                  <a
-                    href="/blogs/t5yqfmz8jFgoXuhegNhR"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
-                    style={{ color: BRAND.white }}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <span className="material-icons-round text-base">visibility</span>
-                    {t("footer.visibility")}
-                  </a>
-                  <a
-                    href="/blogs/X0Rf1ZCsohI4StsJr521"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
-                    style={{ color: BRAND.white }}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <span className="material-icons-round text-base">auto_awesome</span>
-                    {t("footer.philosophy")}
-                  </a>
-                  <a
-                    href="/blogs/mdAXoWNRHP0Tk4MywpeA"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
-                    style={{ color: BRAND.white }}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <span className="material-icons-round text-base">history</span>
-                    {t("footer.history")}
-                  </a>
-                  <a
-                    href="/blogs/8ZKCpeeM2d37oaC0wBYB"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
-                    style={{ color: BRAND.white }}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <span className="material-icons-round text-base">groups</span>
-                    {t("footer.community")}
-                  </a>
+                  {SOBRE_NOSOTROS_ITEMS.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                      style={{ color: BRAND.white }}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <span className="material-icons-round text-base">{item.icon}</span>
+                      {t(item.labelKey)}
+                    </a>
+                  ))}
                 </div>
               </div>
 
