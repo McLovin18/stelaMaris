@@ -56,22 +56,9 @@ const Footer: React.FC = () => {
 
         {/* Main row */}
         <div className={styles.ftMain}>
-          <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-8 items-center">
+          <div className="w-full flex flex-col gap-10">
 
-            {/* Columna 1: Información de la tienda */}
-            <div className="flex flex-col items-center md:items-start text-center md:text-left gap-1">
-              <span className="text-base font-bold tracking-wide text-white">
-                Stella Maris 👛
-              </span>
-              <span className="text-xs text-white">
-                by Gabriela Cárdenas
-              </span>
-              <p className="text-xs text-white mt-1 max-w-[220px]">
-                {t("footer.description")}
-              </p>
-            </div>
-
-            {/* Columna 2: Redes sociales */}
+            {/* Redes sociales - arriba centrado */}
             <div className="w-full flex justify-center">
               <ul className={styles.ftSocials}>
                 {socialLinks.map(({ href, label, Icon }) => (
@@ -91,63 +78,80 @@ const Footer: React.FC = () => {
               </ul>
             </div>
 
-            {/* Columna 3: Cosas de la marca */}
-            <div className="flex flex-col items-center md:items-start gap-2">
-              <span className="text-xs font-bold text-white mb-1">{t("footer.brand_content")}</span>
-              <ul className="flex flex-col gap-1.5">
-                <li>
-                  <a
-                    href="/blogs/mdAXoWNRHP0Tk4MywpeA"
-                    className="text-xs text-white hover:text-white/80 transition-colors"
-                    onClick={() => trackLinkClick().catch(console.error)}
-                  >
-                    {t("footer.history")}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/blogs/X0Rf1ZCsohI4StsJr521"
-                    className="text-xs text-white hover:text-white/80 transition-colors"
-                    onClick={() => trackLinkClick().catch(console.error)}
-                  >
-                    {t("footer.philosophy")}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/blogs/t5yqfmz8jFgoXuhegNhR"
-                    className="text-xs text-white hover:text-white/80 transition-colors"
-                    onClick={() => trackLinkClick().catch(console.error)}
-                  >
-                    {t("footer.visibility")}
-                  </a>
-                </li>
-              </ul>
-            </div>
+            {/* 3 columnas de información debajo */}
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
 
-            {/* Columna 4: Información de contacto */}
-            <div className="flex flex-col items-center md:items-end gap-2.5">
-              <a
-                href={`https://wa.me/${WHATSAPP_NUMBER}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-2 text-xs text-white hover:text-white transition-colors"
-                onClick={() => trackLinkClick().catch(console.error)}
-              >
-                <IconWhatsApp />
-                <span>{WHATSAPP_DISPLAY}</span>
-              </a>
+              {/* Columna 1: Información de la tienda */}
+              <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2">
+                <span className="text-xl font-bold tracking-wide text-white">
+                  Stella Maris 👛
+                </span>
+                <span className="text-base text-white">
+                  by Gabriela Cárdenas
+                </span>
+                <p className="text-base text-white mt-2 max-w-[220px]">
+                  {t("footer.description")}
+                </p>
+              </div>
 
-              <a
-                href={MAPS_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-2 text-xs text-white hover:text-white transition-colors"
-                onClick={() => trackLinkClick().catch(console.error)}
-              >
-                <IconLocation />
-                <span>{t("footer.location")}</span>
-              </a>
+              {/* Columna 2: Cosas de la marca */}
+              <div className="flex flex-col items-center gap-3">
+                <span className="text-base font-bold text-white mb-1">{t("footer.brand_content")}</span>
+                <ul className="flex flex-col gap-2">
+                  <li>
+                    <a
+                      href="/blogs/mdAXoWNRHP0Tk4MywpeA"
+                      className="text-base text-white hover:text-white/80 transition-colors"
+                      onClick={() => trackLinkClick().catch(console.error)}
+                    >
+                      {t("footer.history")}
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/blogs/X0Rf1ZCsohI4StsJr521"
+                      className="text-base text-white hover:text-white/80 transition-colors"
+                      onClick={() => trackLinkClick().catch(console.error)}
+                    >
+                      {t("footer.philosophy")}
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/blogs/t5yqfmz8jFgoXuhegNhR"
+                      className="text-base text-white hover:text-white/80 transition-colors"
+                      onClick={() => trackLinkClick().catch(console.error)}
+                    >
+                      {t("footer.visibility")}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Columna 3: Información de contacto */}
+              <div className="flex flex-col items-center md:items-end gap-3">
+                <a
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 text-base text-white hover:text-white transition-colors"
+                  onClick={() => trackLinkClick().catch(console.error)}
+                >
+                  <IconWhatsApp />
+                  <span>{WHATSAPP_DISPLAY}</span>
+                </a>
+
+                <a
+                  href={MAPS_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 text-base text-white hover:text-white transition-colors"
+                  onClick={() => trackLinkClick().catch(console.error)}
+                >
+                  <IconLocation />
+                  <span>{t("footer.location")}</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

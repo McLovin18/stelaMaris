@@ -486,7 +486,7 @@ export const Navbar = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-3 py-2 rounded-xl text-sm font-medium text-white transition-colors hover:bg-white/10 whitespace-nowrap text-body"
+                  className="px-3 py-2 rounded-xl text-xl font-medium text-white transition-colors hover:bg-white/10 whitespace-nowrap text-body"
                 >
                   {link.label}
                 </Link>
@@ -502,12 +502,13 @@ export const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => setSobreNosotrosOpen((prev) => !prev)}
-                  className="relative flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-white transition-colors whitespace-nowrap text-body"
+                  className="relative flex items-center gap-1 px-3 py-2 rounded-xl font-medium text-white transition-colors hover:bg-white/10 whitespace-nowrap"
                   style={{
                     background: sobreNosotrosOpen ? `color-mix(in srgb, ${CORAL} 35%, transparent)` : "transparent",
+                    fontSize: "1.25rem",
                   }}
                   onMouseEnter={(e) => {
-                    if (!sobreNosotrosOpen) e.currentTarget.style.background = `color-mix(in srgb, ${CORAL} 22%, transparent)`;
+                    if (!sobreNosotrosOpen) e.currentTarget.style.background = `color-mix(in srgb, ${CORAL} 22%, transparent)`
                   }}
                   onMouseLeave={(e) => {
                     if (!sobreNosotrosOpen) e.currentTarget.style.background = "transparent";

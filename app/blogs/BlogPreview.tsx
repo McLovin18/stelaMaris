@@ -101,11 +101,11 @@ export default function BlogPreview({ blog, device }: BlogPreviewProps) {
   return (
     <article className={wrapperClass}>
       <header className="mb-12 border-b border-slate-200 dark:border-slate-800 pb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900 dark:text-white leading-tight">
+        <h1 className="text-3xl md:text-6xl text-center text-[#E9967A] font-bold mb-4 dark:text-white leading-tight">
           {translatedTitle || "(Sin título)"}
         </h1>
         {translatedDescription && (
-          <p className="text-lg text-slate-600 dark:text-slate-400">
+          <p className="text-2xl text-[#A18262] text-center dark:text-slate-400">
             {translatedDescription}
           </p>
         )}
