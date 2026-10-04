@@ -69,7 +69,7 @@ function renderBlock(block: BlogBlock, index: number, languageCode: string) {
             alt={alt || "Imagen del blog"}
             width={800}
             height={1000}
-            className="w-full rounded-lg max-h-[600px] object-cover shadow-md"
+            className="w-full rounded-lg object-contain shadow-md"
             sizes="(max-width: 768px) 100vw, 800px"
             loading="lazy"
           />
