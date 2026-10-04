@@ -147,7 +147,7 @@ export default function BlogsPage() {
                               ? getText(featured.blocks.find((b) => b.type === "image")?.alt, languageCode, featured.blocks.find((b) => b.type === "image")?.alt as string) || getText(featured.title, languageCode, featured.title as string)
                               : ""
                           }
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover"
                         />
                       )}
                     </div>
@@ -188,7 +188,7 @@ export default function BlogsPage() {
                             <img
                               src={imageBlock.url}
                               alt={getText(imageBlock.alt, languageCode, imageBlock.alt as string) || getText(b.title, languageCode, b.title as string)}
-                              className="w-full h-full object-contain"
+                              className="w-full h-full object-cover"
                             />
                           </div>
                         )}
