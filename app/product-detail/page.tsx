@@ -723,7 +723,9 @@ export default function ProductDetailPage({ params }) {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-black/80 dark:text-white/80 leading-relaxed whitespace-pre-line">{rawDescripcion}</p>
+                  <div className="text-sm text-black/80 dark:text-white/80 leading-relaxed">
+                    <Markdown>{rawDescripcion}</Markdown>
+                  </div>
                 )
               ) : (
                 <p className="text-sm text-slate-400 dark:text-white/40">Sin descripción</p>
