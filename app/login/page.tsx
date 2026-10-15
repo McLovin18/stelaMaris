@@ -126,7 +126,7 @@ export default function LoginPage() {
 
       {/* Hero header */}
       <div className="w-full max-w-md mx-auto px-4 pt-10 pb-4 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#BD1C33] mb-5 shadow-lg shadow-[#BD1C33]/30">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#c9765f] mb-5 shadow-lg shadow-[#c9765f]/30">
           <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -217,7 +217,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading || (rateLimitBlockedUntil !== null && rateLimitSecondsRemaining > 0)}
-                className="w-full bg-[#BD1C33] hover:bg-[#8f1526] active:bg-[#8f1526] text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+                className="w-full bg-[#c9765f] hover:bg-[#b0604f] active:bg-[#b0604f] text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
               >
                 {loading ? (
                   <>

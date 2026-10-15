@@ -16,13 +16,13 @@
   --color-background: #FFF0F4;
   --color-primary: #f6a794;  /* rosa coral suave para navbar/footer/info producto */
   --color-border: #e88871;
-  --color-button: #db7156;   /* coral fuerte para botones */
+  --color-button: #e08a75;   /* coral más suave para botones */
   --color-active: #e3795e;
   --color-text: #1a1a1a;
 
   /* --- Variantes derivadas (hover / active) --- */
   --color-primary-dark: #b03870;    /* rosa coral suave oscurecido, hover en navbar/footer */
-  --color-button-dark: #c9765f;     /* coral fuerte oscurecido, hover en botones */
+  --color-button-dark: #d07a65;     /* coral más suave oscurecido, hover en botones */
   --color-background-dark: #f0d4e0; /* coral muy claro oscurecido, hover sobre fondos */
 
   /* --- Semántica --- */

@@ -150,14 +150,14 @@ function MobileCategoriesAccordion({ basePath, t }: { basePath: string; t: (key:
 
   return (
     <div className="flex flex-col gap-1 my-3">
-      <p className="text-xs font-semibold uppercase tracking-wider px-2 mb-1"
+      <p className="text-sm font-semibold uppercase tracking-wider px-2 mb-1"
         style={{ color: BRAND.textMuted }}>
         {t("nav.categories")}
       </p>
       {categoriasTraducidas.map((cat) => (
         <div key={cat.id}>
           <button
-            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-base font-medium transition-colors"
             style={{ color: BRAND.white }}
             onClick={() =>
               setOpenCat(openCat === cat.id ? null : cat.id)
@@ -193,7 +193,7 @@ function MobileCategoriesAccordion({ basePath, t }: { basePath: string; t: (key:
                   {sub.subcategorias?.length > 0 ? (
                     <>
                       <button
-                        className="w-full flex items-center justify-between px-3 py-2 text-sm transition-shadow hover:shadow-sm rounded-md"
+                        className="w-full flex items-center justify-between px-3 py-2 text-base transition-shadow hover:shadow-sm rounded-md"
                         style={{ color: BRAND.white }}
                         onClick={() =>
                           setOpenSub(openSub === sub.id ? null : sub.id)
@@ -220,7 +220,7 @@ function MobileCategoriesAccordion({ basePath, t }: { basePath: string; t: (key:
                             <a
                               key={subsub.id}
                               href={`${basePath}?cat=${cat.id}&sub=${sub.id}&subsub=${subsub.id}`}
-                              className="block px-4 py-2 text-xs transition-colors"
+                              className="block px-4 py-2 text-sm transition-colors"
                               style={{ color: BRAND.textMuted }}
                             >
                               {subsub.nombre}
@@ -232,7 +232,7 @@ function MobileCategoriesAccordion({ basePath, t }: { basePath: string; t: (key:
                   ) : (
                     <a
                       href={`${basePath}?cat=${cat.id}&sub=${sub.id}`}
-                      className="block px-3 py-2 text-sm transition-shadow hover:shadow-sm rounded-md"
+                      className="block px-3 py-2 text-base transition-shadow hover:shadow-sm rounded-md"
                       style={{ color: BRAND.white }}
                     >
                       {sub.nombre}
@@ -246,7 +246,7 @@ function MobileCategoriesAccordion({ basePath, t }: { basePath: string; t: (key:
           {!cat.subcategorias?.length && openCat === cat.id && (
             <a
               href={`${basePath}?cat=${cat.id}`}
-              className="block px-3 py-2 text-sm"
+              className="block px-3 py-2 text-base"
               style={{ color: BRAND.white }}
             >
               {cat.nombre}
@@ -486,7 +486,7 @@ export const Navbar = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-3 py-2 rounded-xl text-xl font-medium text-white transition-colors hover:bg-white/10 whitespace-nowrap text-body"
+                  className="px-3 py-2 rounded-xl text-2xl font-medium text-white transition-colors hover:bg-white/10 whitespace-nowrap text-body"
                 >
                   {link.label}
                 </Link>
@@ -505,7 +505,7 @@ export const Navbar = () => {
                   className="relative flex items-center gap-1 px-3 py-2 rounded-xl font-medium text-white transition-colors hover:bg-white/10 whitespace-nowrap"
                   style={{
                     background: sobreNosotrosOpen ? `color-mix(in srgb, ${CORAL} 35%, transparent)` : "transparent",
-                    fontSize: "1.25rem",
+                    fontSize: "1.5rem",
                   }}
                   onMouseEnter={(e) => {
                     if (!sobreNosotrosOpen) e.currentTarget.style.background = `color-mix(in srgb, ${CORAL} 22%, transparent)`
@@ -561,7 +561,7 @@ export const Navbar = () => {
                           key={item.href}
                           href={item.href}
                           onClick={() => setSobreNosotrosOpen(false)}
-                          className="group/item flex items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                          className="group/item flex items-center gap-3 px-4 py-2.5 text-base transition-colors"
                           style={{ color: "#3a2620" }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.background = `color-mix(in srgb, ${CORAL} 14%, transparent)`;
@@ -798,7 +798,7 @@ export const Navbar = () => {
               {cat.subcategorias?.length > 0 ? (
                 <button
                   onClick={() => setOpenCatId(openCatId === cat.id ? null : cat.id)}
-                  className="flex items-center gap-1 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-shadow rounded-xl hover:shadow-sm text-white"
+                  className="flex items-center gap-1 px-3 py-2.5 text-base font-medium whitespace-nowrap transition-shadow rounded-xl hover:shadow-sm text-white"
                 >
                   {cat.icono && (
                     <span className="material-icons-round" style={{ fontSize: 15, color: BRAND.gold }}>{cat.icono}</span>
@@ -814,7 +814,7 @@ export const Navbar = () => {
               ) : (
                 <Link
                   href={`${basePath}?cat=${cat.id}`}
-                  className="flex items-center gap-1 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-shadow rounded-xl hover:shadow-sm text-white"
+                  className="flex items-center gap-1 px-3 py-2.5 text-base font-medium whitespace-nowrap transition-shadow rounded-xl hover:shadow-sm text-white"
                 >
                   {cat.icono && (
                     <span className="material-icons-round" style={{ fontSize: 15, color: BRAND.gold }}>{cat.icono}</span>
@@ -847,7 +847,7 @@ export const Navbar = () => {
                         <>
                           <button
                             onClick={() => setOpenSubId(openSubId === sub.id ? null : sub.id)}
-                            className="w-full flex items-center justify-between px-4 py-2.5 text-sm transition-shadow hover:shadow-sm rounded-md"
+                            className="w-full flex items-center justify-between px-4 py-2.5 text-base transition-shadow hover:shadow-sm rounded-md"
                           >
                             <span style={{ color: BRAND.white }} className="group-hover/sub:opacity-80 transition-opacity">{sub.nombre}</span>
                             <span
@@ -874,7 +874,7 @@ export const Navbar = () => {
                               <Link
                                 key={subsub.id}
                                 href={`${basePath}?cat=${cat.id}&sub=${sub.id}&subsub=${subsub.id}`}
-                                className="block px-4 py-2.5 text-sm transition-colors"
+                                className="block px-4 py-2.5 text-base transition-colors"
                                 style={{ color: BRAND.white }}
                               >
                                 <span className="hover:opacity-80">{subsub.nombre}</span>
@@ -885,7 +885,7 @@ export const Navbar = () => {
                       ) : (
                         <Link
                           href={`${basePath}?cat=${cat.id}&sub=${sub.id}`}
-                          className="block px-4 py-2.5 text-sm transition-shadow hover:shadow-sm rounded-md"
+                          className="block px-4 py-2.5 text-base transition-shadow hover:shadow-sm rounded-md"
                           style={{ color: BRAND.white }}
                         >
                           <span className="group-hover/sub:opacity-80 transition-opacity">{sub.nombre}</span>
@@ -1017,7 +1017,7 @@ export const Navbar = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-base font-medium transition-colors"
                   style={{ color: BRAND.white }}
                 >
                   {link.label}
@@ -1035,7 +1035,7 @@ export const Navbar = () => {
                     <a
                       key={item.href}
                       href={item.href}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-base transition-colors"
                       style={{ color: BRAND.white }}
                       onClick={() => setMobileOpen(false)}
                     >
@@ -1064,7 +1064,7 @@ export const Navbar = () => {
                 <>
                   <a
                     href="/admin/perfil"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-base transition-colors"
                     style={{ color: BRAND.white }}
                   >
                     <span className="material-icons-round text-base">person</span>
@@ -1072,14 +1072,14 @@ export const Navbar = () => {
                   </a>
                   <a
                     href="/admin/config"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-base transition-colors"
                     style={{ color: BRAND.white }}
                   >
                     <span className="material-icons-round text-base">settings</span>
                     Configuración
                   </a>
                   <button
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left text-red-500 font-medium transition-colors"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-base text-left text-red-500 font-medium transition-colors"
                     onClick={async () => {
                       const { logoutUser } = await import("../lib/firebase-auth");
                       await logoutUser();

@@ -83,25 +83,25 @@ const Footer: React.FC = () => {
 
               {/* Columna 1: Información de la tienda */}
               <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2">
-                <span className="text-xl font-bold tracking-wide text-white">
+                <span className="text-2xl font-bold tracking-wide text-white">
                   Stella Maris 👛
                 </span>
-                <span className="text-base text-white">
+                <span className="text-lg text-white">
                   by Gabriela Cárdenas
                 </span>
-                <p className="text-base text-white mt-2 max-w-[220px]">
+                <p className="text-lg text-white mt-2 max-w-[220px]">
                   {t("footer.description")}
                 </p>
               </div>
 
               {/* Columna 2: Cosas de la marca */}
               <div className="flex flex-col items-center gap-3">
-                <span className="text-base font-bold text-white mb-1">{t("footer.brand_content")}</span>
+                <span className="text-lg font-bold text-white mb-1">{t("footer.brand_content")}</span>
                 <ul className="flex flex-col gap-2">
                   <li>
                     <a
                       href="/blogs/mdAXoWNRHP0Tk4MywpeA"
-                      className="text-base text-white hover:text-white/80 transition-colors"
+                      className="text-lg text-white hover:text-white/80 transition-colors"
                       onClick={() => trackLinkClick().catch(console.error)}
                     >
                       {t("footer.history")}
@@ -110,7 +110,7 @@ const Footer: React.FC = () => {
                   <li>
                     <a
                       href="/blogs/X0Rf1ZCsohI4StsJr521"
-                      className="text-base text-white hover:text-white/80 transition-colors"
+                      className="text-lg text-white hover:text-white/80 transition-colors"
                       onClick={() => trackLinkClick().catch(console.error)}
                     >
                       {t("footer.philosophy")}
@@ -119,7 +119,7 @@ const Footer: React.FC = () => {
                   <li>
                     <a
                       href="/blogs/t5yqfmz8jFgoXuhegNhR"
-                      className="text-base text-white hover:text-white/80 transition-colors"
+                      className="text-lg text-white hover:text-white/80 transition-colors"
                       onClick={() => trackLinkClick().catch(console.error)}
                     >
                       {t("footer.visibility")}
@@ -134,7 +134,7 @@ const Footer: React.FC = () => {
                   href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 text-base text-white hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-lg text-white hover:text-white transition-colors"
                   onClick={() => trackLinkClick().catch(console.error)}
                 >
                   <IconWhatsApp />
@@ -145,7 +145,7 @@ const Footer: React.FC = () => {
                   href={MAPS_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 text-base text-white hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-lg text-white hover:text-white transition-colors"
                   onClick={() => trackLinkClick().catch(console.error)}
                 >
                   <IconLocation />

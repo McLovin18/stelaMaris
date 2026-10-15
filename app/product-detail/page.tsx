@@ -365,7 +365,7 @@ export default function ProductDetailPage({ params }) {
   const rawDescripcion = productTranslations.descripcion || (producto as any).descripcion || "";
 
   const inputCls =
-    "w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:outline-none focus:border-slate-400 dark:focus:border-white/30 transition-colors";
+    "w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-base text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/25 focus:outline-none focus:border-slate-400 dark:focus:border-white/30 transition-colors";
 
   const reviewsProps = {
     reviews, avgRating, reviewRating, setReviewRating,
@@ -446,7 +446,7 @@ export default function ProductDetailPage({ params }) {
                 {hasCaracteristicas && (
                   <button
                     onClick={() => handleTabToggle("caracteristicas")}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all ${
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-base font-semibold transition-all ${
                       activeTab === "caracteristicas"
                             ? "bg-[var(--color-button)] text-[var(--text)]"
                             : "bg-[var(--card)] text-black hover:bg-[var(--bgSecondary)]"
@@ -458,7 +458,7 @@ export default function ProductDetailPage({ params }) {
                 )}
                 <button
                   onClick={() => handleTabToggle("resenas")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-base font-semibold transition-all ${
                     hasCaracteristicas ? "border-l border-slate-200 dark:border-white/[0.08]" : ""
                   } ${
                     activeTab === "resenas"
@@ -488,7 +488,7 @@ export default function ProductDetailPage({ params }) {
                   {activeTab === "caracteristicas" && hasCaracteristicas && (
                     <ul className="space-y-2">
                       {producto.caracteristicas.map((c, idx) => (
-                        <li key={idx} className="flex items-start gap-2.5 text-sm text-black/80 dark:text-white/80">
+                        <li key={idx} className="flex items-start gap-2.5 text-base text-black/80 dark:text-white/80">
                           <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-white/20 mt-2 flex-shrink-0" />
                           <Markdown>{c}</Markdown>
                         </li>
@@ -514,13 +514,13 @@ export default function ProductDetailPage({ params }) {
             {/* Nombre + SKU */}
             <div>
               <h1
-                className="text-2xl sm:text-3xl font-bold leading-tight text-slate-800 dark:text-white break-words max-w-full whitespace-pre-line"
+                className="text-3xl sm:text-4xl font-bold leading-tight text-slate-800 dark:text-white break-words max-w-full whitespace-pre-line"
                 style={{ wordBreak: "break-word", maxWidth: "100%" }}
                 title={productTranslations.nombre || producto.nombre}
               >
                 {productTranslations.nombre || producto.nombre}
               </h1>
-              <p className="text-xs text-slate-400 dark:text-white/20 mt-1.5">
+              <p className="text-sm text-slate-400 dark:text-white/20 mt-1.5">
                 {t("product.sku")}: {producto.sku || producto.id}
               </p>
             </div>
@@ -529,9 +529,9 @@ export default function ProductDetailPage({ params }) {
             {reviews.length > 0 && (
               <div className="flex items-center gap-1.5">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i} className={`text-base ${i < Math.round(avgRating) ? "text-yellow-400" : "text-slate-200 dark:text-white/10"}`}>★</span>
+                  <span key={i} className={`text-lg ${i < Math.round(avgRating) ? "text-yellow-400" : "text-slate-200 dark:text-white/10"}`}>★</span>
                 ))}
-                <span className="text-xs text-slate-400 dark:text-white/25 ml-1">
+                <span className="text-sm text-slate-400 dark:text-white/25 ml-1">
                   {avgRating.toFixed(1)} ({reviews.length})
                 </span>
               </div>
@@ -539,15 +539,15 @@ export default function ProductDetailPage({ params }) {
 
             <div className="flex items-baseline gap-3 flex-wrap">
               {hasDiscount && (
-                <span className="text-sm text-slate-400 dark:text-white/20 line-through">
+                <span className="text-base text-slate-400 dark:text-white/20 line-through">
                   ${fakeOldPrice?.toFixed(2)}
                 </span>
               )}
-              <span className="text-3xl font-extrabold text-slate-800 dark:text-white">
+              <span className="text-4xl font-extrabold text-slate-800 dark:text-white">
                 ${finalPrice.toFixed(2)}
               </span>
               {hasDiscount && (
-                <span className="text-xs font-semibold text-red-500 bg-red-50 dark:bg-red-400/10 px-2 py-0.5 rounded-full">
+                <span className="text-sm font-semibold text-red-500 bg-red-50 dark:bg-red-400/10 px-2 py-0.5 rounded-full">
                   {discount}% OFF
                 </span>
               )}
@@ -557,8 +557,8 @@ export default function ProductDetailPage({ params }) {
 
             {/* Stock */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 dark:text-white/30 font-medium">{t("product.stock")}:</span>
-              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+              <span className="text-sm text-slate-400 dark:text-white/30 font-medium">{t("product.stock")}:</span>
+              <span className={`text-sm font-semibold px-2.5 py-1 rounded-full ${
                 hasVariations && variationAttributeIds.length > 0 && !variationAttributeIds.every(attrId => selectedVariations[attrId])
                   ? "bg-blue-50 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400"
                   : maxCantidad > 0
@@ -599,14 +599,14 @@ export default function ProductDetailPage({ params }) {
             {/* Campos de personalización */}
             {(producto as any)?.personalizado && (producto as any)?.camposPersonalizacion && (producto as any).camposPersonalizacion.length > 0 && (
               <div className="mt-6 rounded-xl border p-4" style={{ borderColor: "var(--border)", background: "var(--bgSecondary)" }}>
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: "#f6a794" }}>
-                  <span className="material-icons-round text-base">auto_awesome</span>
+                <h3 className="text-base font-semibold mb-3 flex items-center gap-2" style={{ color: "#f6a794" }}>
+                  <span className="material-icons-round text-lg">auto_awesome</span>
                   Personalización
                 </h3>
                 <div className="space-y-3">
                   {(producto as any).camposPersonalizacion.map((campo: any) => (
                     <div key={campo.id}>
-                      <label className="block text-xs font-medium mb-1" style={{ color: "var(--text)" }}>
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--text)" }}>
                         {campo.nombre}
                       </label>
                       {campo.tipo === "texto" ? (
@@ -615,7 +615,7 @@ export default function ProductDetailPage({ params }) {
                           value={personalizacionValues[campo.id] || ""}
                           onChange={(e) => setPersonalizacionValues(prev => ({ ...prev, [campo.id]: e.target.value }))}
                           placeholder={`Ingresa ${campo.nombre.toLowerCase()}`}
-                          className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2"
+                          className="w-full rounded-lg border px-3 py-2 text-base outline-none focus:ring-2"
                           style={{ borderColor: "var(--border)", background: "var(--background)", color: "var(--text)" }}
                         />
                       ) : campo.tipo === "numero" ? (
@@ -624,7 +624,7 @@ export default function ProductDetailPage({ params }) {
                           value={personalizacionValues[campo.id] || ""}
                           onChange={(e) => setPersonalizacionValues(prev => ({ ...prev, [campo.id]: e.target.value }))}
                           placeholder={`Ingresa ${campo.nombre.toLowerCase()}`}
-                          className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2"
+                          className="w-full rounded-lg border px-3 py-2 text-base outline-none focus:ring-2"
                           style={{ borderColor: "var(--border)", background: "var(--background)", color: "var(--text)" }}
                         />
                       ) : campo.tipo === "fecha" ? (
@@ -632,7 +632,7 @@ export default function ProductDetailPage({ params }) {
                           type="date"
                           value={personalizacionValues[campo.id] || ""}
                           onChange={(e) => setPersonalizacionValues(prev => ({ ...prev, [campo.id]: e.target.value }))}
-                          className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2"
+                          className="w-full rounded-lg border px-3 py-2 text-base outline-none focus:ring-2"
                           style={{ borderColor: "var(--border)", background: "var(--background)", color: "var(--text)" }}
                         />
                       ) : null}
@@ -645,13 +645,13 @@ export default function ProductDetailPage({ params }) {
             {/* Cantidad */}
             {maxCantidad > 0 && (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400 dark:text-white/30 font-medium">{t("product.quantity")}:</span>
+                <span className="text-sm text-slate-400 dark:text-white/30 font-medium">{t("product.quantity")}:</span>
                 <div className="flex items-center bg-[var(--bgSecondary)] rounded-xl p-1 gap-1">
                   <button
                     onClick={() => setCantidad((v) => Math.max(1, v - 1))}
                     className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-600 dark:text-white/60 hover:bg-white dark:hover:bg-white/10 font-bold text-lg transition-colors"
                   >−</button>
-                  <span className="w-9 text-center text-sm font-semibold text-slate-800 dark:text-white">
+                  <span className="w-9 text-center text-base font-semibold text-slate-800 dark:text-white">
                     {cantidad}
                   </span>
                   <button
@@ -667,7 +667,7 @@ export default function ProductDetailPage({ params }) {
               <button
                 onClick={handleAddCart}
                 disabled={maxCantidad === 0 || (hasVariations && variationAttributeIds.length > 0 && !variationAttributeIds.every(attrId => selectedVariations[attrId]))}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-base font-bold border transition-all ${
                   maxCantidad === 0 || (hasVariations && variationAttributeIds.length > 0 && !variationAttributeIds.every(attrId => selectedVariations[attrId]))
                     ? "bg-white text-slate-300 border-slate-200 cursor-not-allowed opacity-50 shadow-none"
                     : inCart
@@ -700,12 +700,12 @@ export default function ProductDetailPage({ params }) {
 
             {/* Descripción debajo de Añadir al carrito */}
             <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-2 text-black dark:text-white">{t("product.product_description")}</h2>
+              <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">{t("product.product_description")}</h2>
               {rawDescripcion.trim() ? (
                 descItems.length > 0 && (descItems.length > 1 || descItems[0].sub.length > 0 || descItems[0].text !== rawDescripcion.trim()) ? (
                   <ul className="space-y-2">
                     {descItems.map((item, idx) => (
-                      <li key={idx} className="flex gap-2 text-sm text-black/80 dark:text-white/80 leading-relaxed">
+                      <li key={idx} className="flex gap-2 text-base text-black/80 dark:text-white/80 leading-relaxed">
                         <span className="text-slate-300 dark:text-white/20 flex-shrink-0 mt-0.5">›</span>
                         <span>
                           {item.text}
@@ -723,12 +723,12 @@ export default function ProductDetailPage({ params }) {
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-sm text-black/80 dark:text-white/80 leading-relaxed">
+                  <div className="text-base text-black/80 dark:text-white/80 leading-relaxed">
                     <Markdown>{rawDescripcion}</Markdown>
                   </div>
                 )
               ) : (
-                <p className="text-sm text-slate-400 dark:text-white/40">Sin descripción</p>
+                <p className="text-base text-slate-400 dark:text-white/40">Sin descripción</p>
               )}
             </div>
 
@@ -737,7 +737,7 @@ export default function ProductDetailPage({ params }) {
               <ul className="space-y-2">
                 <h1 className="text-black bg-text-white">Descripción:</h1>
                 {descItems.map((item, idx) => (
-                  <li key={idx} className="flex gap-2 text-sm text-black/80 dark:text-white/80 leading-relaxed">
+                  <li key={idx} className="flex gap-2 text-base text-black/80 dark:text-white/80 leading-relaxed">
                     <span className="text-slate-300 dark:text-white/20 flex-shrink-0 mt-0.5">›</span>
                     <span>
                       {item.text}
@@ -766,7 +766,7 @@ export default function ProductDetailPage({ params }) {
             {hasCaracteristicas && (
               <button
                 onClick={() => handleTabToggle("caracteristicas")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-base font-semibold transition-all ${
                   activeTab === "caracteristicas"
                     ? "bg-[var(--color-button)] text-[var(--text)]"
                     : "bg-white text-slate-600 hover:bg-slate-50"
@@ -778,7 +778,7 @@ export default function ProductDetailPage({ params }) {
             )}
             <button
               onClick={() => handleTabToggle("resenas")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-base font-semibold transition-all ${
                 hasCaracteristicas ? "border-l border-slate-200 dark:border-white/[0.08]" : ""
               } ${
                 activeTab === "resenas"
@@ -805,7 +805,7 @@ export default function ProductDetailPage({ params }) {
               {activeTab === "caracteristicas" && hasCaracteristicas && (
                 <ul className="space-y-2">
                   {producto.caracteristicas.map((c, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-sm text-black/80 dark:text-white/80">
+                    <li key={idx} className="flex items-start gap-2.5 text-base text-black/80 dark:text-white/80">
                       <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-white/20 mt-2 flex-shrink-0" />
                       <Markdown>{c}</Markdown>
                     </li>
@@ -843,22 +843,22 @@ function ReviewsSection({
       {/* Resumen */}
       {reviews.length > 0 ? (
         <div className="flex items-center gap-3">
-          <span className="text-4xl font-extrabold text-slate-800 dark:text-white leading-none">
+          <span className="text-5xl font-extrabold text-slate-800 dark:text-white leading-none">
             {avgRating.toFixed(1)}
           </span>
           <div>
             <div className="flex gap-0.5 mb-0.5">
               {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} className={`text-lg ${i < Math.round(avgRating) ? "text-yellow-400" : "text-slate-200 dark:text-white/10"}`}>★</span>
+                <span key={i} className={`text-xl ${i < Math.round(avgRating) ? "text-yellow-400" : "text-slate-200 dark:text-white/10"}`}>★</span>
               ))}
             </div>
-            <p className="text-xs text-slate-400 dark:text-white/25">
+            <p className="text-sm text-slate-400 dark:text-white/25">
               {reviews.length} reseña{reviews.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
       ) : (
-        <p className="text-sm text-black/80 dark:text-white/80">Sé el primero en dejar una reseña.</p>
+        <p className="text-base text-black/80 dark:text-white/80">Sé el primero en dejar una reseña.</p>
       )}
 
       {/* Lista de reseñas */}
@@ -867,17 +867,17 @@ function ReviewsSection({
           {reviews.map((r: any) => (
             <li key={r.id} className="pb-4 border-b border-slate-100 dark:border-white/[0.05]">
               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                <span className="text-sm font-semibold text-slate-700 dark:text-white/75">{r.userName}</span>
+                <span className="text-base font-semibold text-slate-700 dark:text-white/75">{r.userName}</span>
                 <div className="flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} className={`text-sm ${i < r.rating ? "text-yellow-400" : "text-slate-200 dark:text-white/10"}`}>★</span>
+                    <span key={i} className={`text-base ${i < r.rating ? "text-yellow-400" : "text-slate-200 dark:text-white/10"}`}>★</span>
                   ))}
                 </div>
-                <span className="text-xs text-slate-300 dark:text-white/20 ml-auto">
+                <span className="text-sm text-slate-300 dark:text-white/20 ml-auto">
                   {new Date(r.createdAt).toLocaleDateString("es-EC", { day: "2-digit", month: "short", year: "numeric" })}
                 </span>
               </div>
-              <p className="text-sm text-slate-500 dark:text-white/45 leading-relaxed">{r.comment}</p>
+              <p className="text-base text-slate-500 dark:text-white/45 leading-relaxed">{r.comment}</p>
             </li>
           ))}
         </ul>
@@ -885,23 +885,23 @@ function ReviewsSection({
 
       {/* Formulario */}
       <form onSubmit={handleSubmitReview} className="pt-2 space-y-4">
-        <p className="text-sm font-medium text-black/80 dark:text-white/80">Escribe una reseña</p>
+        <p className="text-base font-medium text-black/80 dark:text-white/80">Escribe una reseña</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-black/75 dark:text-white/80">Nombre</label>
+            <label className="text-sm text-black/75 dark:text-white/80">Nombre</label>
             <input className={inputCls} placeholder="Tu nombre" value={reviewName}
               onChange={(e) => setReviewName(e.target.value)} required={!isLogged} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-black/75 dark:text-white/80">Correo</label>
+            <label className="text-sm text-black/75 dark:text-white/80">Correo</label>
             <input className={inputCls} placeholder="tu@correo.com" type="email" value={reviewEmail}
               onChange={(e) => setReviewEmail(e.target.value)} required={!isLogged} />
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-black/80 dark:text-white/80">Calificación</label>
+          <label className="text-sm text-black/80 dark:text-white/80">Calificación</label>
           <div className="flex gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
               <span key={i} onClick={() => setReviewRating(i + 1)} role="button"
@@ -914,7 +914,7 @@ function ReviewsSection({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-black/80 dark:text-white/80">Comentario</label>
+          <label className="text-sm text-black/80 dark:text-white/80">Comentario</label>
           <textarea className={`${inputCls} resize-none`} rows={3}
             placeholder="Cuéntanos tu experiencia..." value={reviewText}
             onChange={(e) => setReviewText(e.target.value)} required />

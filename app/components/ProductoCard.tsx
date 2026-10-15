@@ -80,10 +80,10 @@ const cardStyles = `
     top: 10px;
     left: 10px;
     z-index: 10;
-    background: #BD1C33;
+    background: #c9765f;
     color: #FFFFFF;
     font-family: 'Barlow', sans-serif;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.06em;
     padding: 3px 8px;
@@ -103,7 +103,7 @@ const cardStyles = `
 
   .pc-no-stock span {
     font-family: 'Barlow', sans-serif;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -138,7 +138,7 @@ const cardStyles = `
   .pc-fav.is-fav {
     opacity: 1;
     transform: scale(1);
-    background: #BD1C33;
+    background: #c9765f;
     color: #FFFFFF;
   }
 
@@ -147,9 +147,9 @@ const cardStyles = `
     transform: scale(1);
   }
 
-  /* ── barra info inferior — estilo coral fuerte ── */
+  /* ── barra info inferior — estilo coral suave ── */
   .pc-info {
-    background: #f6a794;
+    background: #ffb6a3;
     color: #FFFFFF;
     padding: 10px 12px 12px;
     display: flex;
@@ -169,7 +169,7 @@ const cardStyles = `
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.3;
     color: #ffffff;
     display: -webkit-box;
@@ -187,7 +187,7 @@ const cardStyles = `
 
   @media (min-width: 640px) {
     .pc-name {
-      font-size: 15px;
+      font-size: 18px;
       min-height: 2.6em;
       max-height: 2.6em;
     }
@@ -205,21 +205,21 @@ const cardStyles = `
   .pc-price-final {
     font-family: 'Barlow', sans-serif;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 15px;
     color: #ffffff;
     letter-spacing: 0.02em;
   }
 
   @media (min-width: 640px) {
     .pc-price-final {
-      font-size: 15px;
+      font-size: 18px;
     }
   }
 
   .pc-price-old {
     font-family: 'Barlow', sans-serif;
     font-weight: 400;
-    font-size: 11px;
+    font-size: 13px;
     color: rgba(255,255,255,0.35);
     text-decoration: line-through;
   }
@@ -248,7 +248,7 @@ const cardStyles = `
     background: transparent;
     color: #fff;
     font-family: 'Barlow', sans-serif;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
