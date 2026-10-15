@@ -34,8 +34,8 @@ const BRAND = {
 
 // Coral de referencia (fondo del navbar). Se usa como acento del dropdown
 // "Sobre Nosotros" para que quede coherente con el tono principal de la marca.
-const CORAL = "#F6A794";
-const CORAL_DARK = "#E88871";
+const CORAL = "#ffc4b3";
+const CORAL_DARK = "#e89a85";
 
 // ─────────────────────────────────────────────
 // Contenido de "Sobre Nosotros" (desktop dropdown + mobile accordion comparten estos items)

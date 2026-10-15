@@ -80,7 +80,7 @@ const cardStyles = `
     top: 10px;
     left: 10px;
     z-index: 10;
-    background: #c9765f;
+    background: #d08a75;
     color: #FFFFFF;
     font-family: 'Barlow', sans-serif;
     font-size: 12px;
@@ -138,7 +138,7 @@ const cardStyles = `
   .pc-fav.is-fav {
     opacity: 1;
     transform: scale(1);
-    background: #c9765f;
+    background: #d08a75;
     color: #FFFFFF;
   }
 
@@ -147,9 +147,9 @@ const cardStyles = `
     transform: scale(1);
   }
 
-  /* ── barra info inferior — estilo coral suave ── */
+  /* ── barra info inferior — estilo coral muy suave ── */
   .pc-info {
-    background: #ffb6a3;
+    background: #ffcec0;
     color: #FFFFFF;
     padding: 10px 12px 12px;
     display: flex;
