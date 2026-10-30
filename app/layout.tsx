@@ -27,14 +27,14 @@ const sourceSerif4 = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: {
-    default: "Stella Maris 👛 - Carteras de Paja Coquilla",
+    default: "Stella Maris 👛 - Carteras de Paja Toquilla",
     template: "%s | Stella Maris 👛 by Gabriela Cárdenas",
   },
   description:
-    "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Descubre nuestras hermosas carteras de paja coquilla hechas a mano con amor.",
+    "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Descubre nuestras hermosas carteras de paja Toquilla hechas a mano con amor.",
   keywords: [
-    "carteras de paja coquilla",
-    "paja coquilla",
+    "carteras de paja Toquilla",
+    "paja toquilla",
     "carteras ecuatorianas",
     "artesanías ecuatorianas",
     "Stella Maris",
@@ -59,15 +59,15 @@ export const metadata: Metadata = {
     locale: "es_ES",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: "Stella Maris 👛 - Carteras de Paja Coquilla",
+    title: "Stella Maris 👛 - Carteras de Paja Toquilla",
     description:
-      "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Descubre nuestras hermosas carteras de paja coquilla hechas a mano con amor.",
+      "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Descubre nuestras hermosas carteras de paja toquilla hechas a mano con amor.",
     images: [
       {
         url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: "Stella Maris 👛 - Carteras de Paja Coquilla",
+        alt: "Stella Maris 👛 - Carteras de Paja Toquilla",
         type: "image/jpeg",
       },
     ],
@@ -76,9 +76,9 @@ export const metadata: Metadata = {
   // Twitter Card
   twitter: {
     card: "summary_large_image",
-    title: "Stella Maris 👛 - Carteras de Paja Coquilla",
+    title: "Stella Maris 👛 - Carteras de Paja Toquilla",
     description:
-      "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Carteras de paja coquilla hechas a mano.",
+      "Stella Maris 🌟 Una marca 100% Ecuatoriana 🇪🇨 hecha con Propósito, Estilo y Elegancia. Carteras de paja toquilla hechas a mano.",
     images: [`${SITE_URL}/twitter-image.jpg`],
   },
 
