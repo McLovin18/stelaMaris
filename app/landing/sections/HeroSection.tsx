@@ -21,6 +21,8 @@ type HeroItem = {
   buttonText?: TranslatableText;
   buttonLink?: string;
   image?: string | null;
+  images?: string[];
+  videoUrl?: string | null;
   generalMessage?: TranslatableText;
   fieldStyles?: Record<string, LandingFieldStyle>;
   fieldPositions?: Record<string, { desktop?: FieldPosition; mobile?: FieldPosition }>;
@@ -38,6 +40,8 @@ export type HeroSectionProps = {
   buttonText?: TranslatableText;
   buttonLink?: string;
   image?: string | null;
+  images?: string[];
+  videoUrl?: string | null;
   styles?: LandingSectionStyles;
   fieldStyles?: Record<string, LandingFieldStyle>;
   fieldPositions?: Record<string, { desktop?: FieldPosition; mobile?: FieldPosition }>;
@@ -58,6 +62,8 @@ export default function HeroSection({
   buttonText,
   buttonLink,
   image,
+  images,
+  videoUrl,
   styles,
   fieldStyles,
   fieldPositions,
@@ -150,11 +156,13 @@ export default function HeroSection({
               buttonText,
               buttonLink,
               image,
+              images,
+              videoUrl,
               generalMessage,
             },
           ]
-    ).filter((h) => h && (h.title || h.subtitle || h.image));
-  }, [items, title, subtitle, badge, buttonText, buttonLink, image, generalMessage]);
+    ).filter((h) => h && (h.title || h.subtitle || h.image || h.videoUrl));
+  }, [items, title, subtitle, badge, buttonText, buttonLink, image, images, videoUrl, generalMessage]);
 
   // debug logs removed
 
@@ -181,9 +189,11 @@ export default function HeroSection({
     if (heroItems.length > 1) {
       // Precargar la siguiente imagen
       const nextIndex = (currentIndex + 1) % heroItems.length;
-      const nextImage = heroItems[nextIndex]?.image;
+      const nextItem = heroItems[nextIndex];
+      const nextImage = nextItem?.image;
       
-      if (nextImage) {
+      // Solo precargar si no es video
+      if (nextImage && !nextItem?.videoUrl) {
         const img = new window.Image();
         img.src = nextImage;
       }
@@ -195,6 +205,10 @@ export default function HeroSection({
   const current = heroItems.length > 0 ? heroItems[Math.min(currentIndex, heroItems.length - 1)] : null;
   const currentFieldStyles = current?.fieldStyles || {};
   const currentFieldPositions = current?.fieldPositions || fieldPositions || {};
+  
+  // Check if current item has video
+  const hasVideo = !!current?.videoUrl;
+  const currentImage = current?.image;
   
   // Get translated text for current item
   const currentTitle = getText(current?.title, languageCode, current?.title as string);
@@ -298,14 +312,24 @@ const innerStyle: React.CSSProperties = {
         className="relative overflow-hidden w-full max-w-full min-h-0"
         style={{
           ...innerStyle,
-          backgroundImage: current?.image ? `url(${current.image})` : undefined,
+          backgroundImage: !hasVideo && currentImage ? `url(${currentImage})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        {current?.image && (
+        {hasVideo ? (
+          <video
+            src={current.videoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+            style={{ display: "block" }}
+          />
+        ) : currentImage && (
           <img
-            src={current.image}
+            src={currentImage}
             alt={currentTitle || "Hero"}
             width={1920}
             height={840}
