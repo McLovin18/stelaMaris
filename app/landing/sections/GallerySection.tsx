@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import type {
   LandingSectionStyles,
   LandingFieldStyle,
@@ -14,11 +14,18 @@ export type GallerySectionProps = {
   fieldStyles?: Record<string, LandingFieldStyle>;
 };
 
+const AUTOPLAY_MOBILE = 5000; // 5s en móvil
+const AUTOPLAY_DESKTOP = 3500;
+const VIEWPORT_PAD = 12; // px de aire vertical para sombras / hover
+const MAX_DOTS = 8;
+
 // Cuántas columnas mostrar según breakpoint
 function getColumns(width: number, total: number): number {
-  if (width < 640) return 2;
-  if (width < 1024) return 3;
-  return Math.min(4, total); // máximo 4 en desktop
+  let c = 4;
+  if (width < 640) c = 1; // móvil: un solo card
+  else if (width < 1024) c = 2;
+  else if (width < 1280) c = 3;
+  return Math.max(1, Math.min(c, total));
 }
 
 export default function GallerySection({
@@ -28,95 +35,163 @@ export default function GallerySection({
   styles,
   fieldStyles,
 }: GallerySectionProps) {
-  const paddingTop = styles?.paddingTop || (typeof window !== "undefined" && window.innerWidth < 768 ? "1rem" : "3rem");
-  const paddingBottom = styles?.paddingBottom || (typeof window !== "undefined" && window.innerWidth < 768 ? "1rem" : "3rem");
-
   const galleryItems = (
     items && items.length
       ? items
       : images.map((src) => ({ title: "", image: src }))
   ) as { title?: string; image?: string }[];
 
-  // ── State ──
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [cols, setCols] = useState(4);
-  const [isPaused, setIsPaused] = useState(false);
-  const [animDir, setAnimDir] = useState<"left" | "right">("right");
-  const [isAnimating, setIsAnimating] = useState(false);
+  const total = galleryItems.length;
 
-  // ── Responsive columns ──
+  // ── State ──
+  const [index, setIndex] = useState(0);
+  const [cols, setCols] = useState(1);
+  const [ready, setReady] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [imgH, setImgH] = useState(0);
+
+  const imgRef = useRef<HTMLDivElement | null>(null);
+  const touchRef = useRef<{ x: number; y: number; horizontal: boolean | null } | null>(null);
+
+  // ── Columnas responsivas ──
   useEffect(() => {
     const update = () => {
-      if (typeof window === "undefined") return;
-      setCols(getColumns(window.innerWidth, galleryItems.length));
+      setCols(getColumns(window.innerWidth, total));
+      setReady(true);
     };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, [galleryItems.length]);
+  }, [total]);
 
-  const effectiveCols = Math.min(cols, galleryItems.length);
-  const needsCarousel = galleryItems.length > effectiveCols;
-  const totalSlides = needsCarousel ? galleryItems.length : 1;
+  const effectiveCols = Math.max(1, Math.min(cols, total));
+  const isMobile = effectiveCols === 1;
+  const needsCarousel = total > effectiveCols;
+  const maxIndex = Math.max(0, total - effectiveCols);
+  const pages = maxIndex + 1;
+  const safeIndex = Math.min(index, maxIndex);
+  const interval = isMobile ? AUTOPLAY_MOBILE : AUTOPLAY_DESKTOP;
 
-  // ── Autoplay ──
+  // ── Medir alto de la imagen para centrar las flechas ──
   useEffect(() => {
-    if (!needsCarousel || isPaused) return;
-    const id = setInterval(() => {
-      setAnimDir("right");
-      setCurrentIndex((prev) => (prev + 1) % galleryItems.length);
-    }, 3500);
-    return () => clearInterval(id);
-  }, [needsCarousel, galleryItems.length, isPaused]);
+    const el = imgRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setImgH(el.offsetHeight));
+    ro.observe(el);
+    setImgH(el.offsetHeight);
+    return () => ro.disconnect();
+  }, [ready, effectiveCols, total]);
 
-  // ── Navegación con animación ──
+  // ── Navegación (circular) ──
   const navigate = useCallback(
     (dir: "left" | "right") => {
-      if (!needsCarousel || isAnimating) return;
-      setAnimDir(dir);
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 300);
-      setCurrentIndex((prev) =>
-        dir === "right"
-          ? (prev + 1) % galleryItems.length
-          : (prev - 1 + galleryItems.length) % galleryItems.length
-      );
+      if (!needsCarousel) return;
+      setIndex((prev) => {
+        const p = Math.min(prev, maxIndex);
+        if (dir === "right") return p >= maxIndex ? 0 : p + 1;
+        return p <= 0 ? maxIndex : p - 1;
+      });
     },
-    [needsCarousel, isAnimating, galleryItems.length]
+    [needsCarousel, maxIndex]
   );
 
-  if (!galleryItems.length) return null;
+  // ── Autoplay (se reinicia con cada cambio de slide) ──
+  useEffect(() => {
+    if (!needsCarousel || isPaused || isDragging) return;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+    const id = setTimeout(() => navigate("right"), interval);
+    return () => clearTimeout(id);
+  }, [needsCarousel, isPaused, isDragging, interval, safeIndex, navigate]);
 
-  // ── Items visibles ──
-  const visibleItems: typeof galleryItems = [];
-  for (let i = 0; i < effectiveCols; i++) {
-    visibleItems.push(galleryItems[(currentIndex + i) % galleryItems.length]);
-  }
+  // ── Swipe táctil ──
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (!needsCarousel) return;
+    const t = e.touches[0];
+    touchRef.current = { x: t.clientX, y: t.clientY, horizontal: null };
+    setIsPaused(true);
+  };
 
+  const onTouchMove = (e: React.TouchEvent) => {
+    const s = touchRef.current;
+    if (!s) return;
+    const t = e.touches[0];
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (s.horizontal === null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+      s.horizontal = Math.abs(dx) > Math.abs(dy);
+    }
+    if (s.horizontal) {
+      setIsDragging(true);
+      setDragX(dx);
+    }
+  };
+
+  const onTouchEnd = () => {
+    const s = touchRef.current;
+    touchRef.current = null;
+    if (s?.horizontal) {
+      if (dragX < -50) navigate("right");
+      else if (dragX > 50) navigate("left");
+    }
+    setIsDragging(false);
+    setDragX(0);
+    setIsPaused(false);
+  };
+
+  if (!total) return null;
+
+  const gap = isMobile ? 0 : effectiveCols >= 3 ? 24 : 20;
+  const slidePct = 100 / effectiveCols;
+  const arrowTop = VIEWPORT_PAD + imgH / 2;
   const itemTitleStyle = fieldStyles?.itemTitle;
+
+  const sectionStyle: React.CSSProperties = {};
+  if (styles?.paddingTop) sectionStyle.paddingTop = styles.paddingTop;
+  if (styles?.paddingBottom) sectionStyle.paddingBottom = styles.paddingBottom;
+
+  const arrowBase =
+    "absolute z-20 -translate-y-1/2 rounded-full flex items-center justify-center " +
+    "h-9 w-9 sm:h-11 sm:w-11 border shadow-lg backdrop-blur-md " +
+    "transition-all duration-200 hover:scale-110 active:scale-90 focus:outline-none " +
+    "focus-visible:ring-2";
+
+  const arrowStyle: React.CSSProperties = {
+    top: arrowTop,
+    background: "color-mix(in srgb, var(--card, #fff) 82%, transparent)",
+    borderColor: "var(--border, #CEC1A8)",
+    color: "var(--text, #584738)",
+  };
 
   return (
     <section
-      style={{ paddingTop, paddingBottom }}
-      className="w-full py-3 flex flex-col items-center m-0"
+      style={sectionStyle}
+      className="w-full max-w-full overflow-hidden flex flex-col items-center m-0 py-6 md:py-12"
     >
       {/* ── Título ── */}
       {title && (
-        <div className="mb-6 text-center">
+        <div className="mb-4 md:mb-6 px-4 text-center">
           <h2
             className="section-title"
             style={fieldStyles?.title || { color: "var(--text)" }}
           >
             {title}
           </h2>
-          {/* Línea decorativa bajo el título */}
-
         </div>
       )}
 
       {/* ── Contenedor principal ── */}
       <div
-        className="w-full max-w-7xl mx-auto relative"
+        className="relative w-full max-w-7xl mx-auto px-4 sm:px-14"
+        style={{
+          opacity: ready ? 1 : 0,
+          transition: "opacity 0.3s ease",
+        }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
@@ -126,19 +201,12 @@ export default function GallerySection({
             type="button"
             onClick={() => navigate("left")}
             aria-label="Anterior"
-            className="
-              absolute left-0 top-[35%] md:top-[40%] -translate-y-1/2 -translate-x-4 lg:-translate-x-6
-              z-20 h-10 w-10 rounded-full flex items-center justify-center
-              shadow-lg border transition-all duration-200
-              hover:scale-110 active:scale-95
-            "
-            style={{
-              background: "var(--card)",
-              borderColor: "var(--border)",
-              color: "var(--text)",
-            }}
+            className={`${arrowBase} left-6 sm:left-1 lg:left-2`}
+            style={arrowStyle}
           >
-            <span className="material-icons-round" style={{ fontSize: 20 }}>chevron_left</span>
+            <span className="material-icons-round" style={{ fontSize: 22 }}>
+              chevron_left
+            </span>
           </button>
         )}
 
@@ -148,79 +216,131 @@ export default function GallerySection({
             type="button"
             onClick={() => navigate("right")}
             aria-label="Siguiente"
-            className="
-              absolute right-0 top-[35%] md:top-[40%] -translate-y-1/2 translate-x-4 lg:translate-x-6
-              z-20 h-10 w-10 rounded-full flex items-center justify-center
-              shadow-lg border transition-all duration-200
-              hover:scale-110 active:scale-95
-            "
-            style={{
-              background: "var(--card)",
-              borderColor: "var(--border)",
-              color: "var(--text)",
-            }}
+            className={`${arrowBase} right-6 sm:right-1 lg:right-2`}
+            style={arrowStyle}
           >
-            <span className="material-icons-round" style={{ fontSize: 20 }}>chevron_right</span>
+            <span className="material-icons-round" style={{ fontSize: 22 }}>
+              chevron_right
+            </span>
           </button>
         )}
 
-        {/* ── Grid de cards ── */}
+        {/* ── Viewport del carrusel ── */}
         <div
-          className="grid gap-4 sm:gap-5 lg:gap-6 w-full"
+          className="w-full overflow-hidden"
           style={{
-            gridTemplateColumns: `repeat(${effectiveCols}, minmax(0, 1fr))`,
-            // Animación de entrada según dirección
-            animation: isAnimating
-              ? `slideIn${animDir === "right" ? "Right" : "Left"} 0.28s ease`
-              : undefined,
+            paddingTop: VIEWPORT_PAD,
+            paddingBottom: VIEWPORT_PAD,
+            touchAction: "pan-y",
           }}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          onTouchCancel={onTouchEnd}
         >
-          {visibleItems.map((item, idx) => (
-            <GalleryCard
-              key={`${currentIndex}-${idx}`}
-              item={item}
-              index={idx}
-              titleStyle={itemTitleStyle}
-              fieldStyles={fieldStyles}
-            />
-          ))}
+          <div
+            className="flex w-full"
+            style={{
+              transform: `translateX(calc(-${safeIndex * slidePct}% + ${dragX}px))`,
+              transition: isDragging
+                ? "none"
+                : "transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1)",
+              willChange: "transform",
+            }}
+          >
+            {galleryItems.map((item, idx) => (
+              <div
+                key={idx}
+                className="min-w-0"
+                style={{
+                  flex: `0 0 ${slidePct}%`,
+                  paddingLeft: gap / 2,
+                  paddingRight: gap / 2,
+                }}
+              >
+                <GalleryCard
+                  item={item}
+                  titleStyle={itemTitleStyle}
+                  imgRef={idx === 0 ? imgRef : undefined}
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* ── Dots ── */}
-        {needsCarousel && totalSlides > 1 && (
-          <div className="flex justify-center gap-2 mb-4 mt-7">
-            {Array.from({ length: totalSlides }).map((_, i) => (
-              <button
-                key={i}
-                aria-label={`Ir a slide ${i + 1}`}
-                onClick={() => {
-                  setAnimDir(i > currentIndex ? "right" : "left");
-                  setCurrentIndex(i);
-                }}
-                className="rounded-full transition-all duration-300"
-                style={{
-                  width: i === currentIndex ? 24 : 8,
-                  height: 8,
-                  background:
-                    i === currentIndex
-                      ? "var(--accent, #AAA396)"
-                      : "var(--border, #CEC1A8)",
-                }}
-              />
-            ))}
+        {/* ── Indicadores ── */}
+        {needsCarousel && pages > 1 && (
+          <div className="flex justify-center items-center mt-4 md:mt-6">
+            {pages <= MAX_DOTS ? (
+              <div className="flex items-center gap-2">
+                {Array.from({ length: pages }).map((_, i) => {
+                  const active = i === safeIndex;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`Ir a slide ${i + 1}`}
+                      aria-current={active}
+                      onClick={() => setIndex(i)}
+                      className="relative rounded-full overflow-hidden transition-all duration-300"
+                      style={{
+                        width: active ? 32 : 8,
+                        height: 8,
+                        background: "var(--border, #CEC1A8)",
+                      }}
+                    >
+                      {active && (
+                        <span
+                          key={`${safeIndex}-${interval}`}
+                          className="absolute inset-y-0 left-0 rounded-full"
+                          style={{
+                            background: "var(--accent, #AAA396)",
+                            width: "100%",
+                            transformOrigin: "left",
+                            animation: `galleryProgress ${interval}ms linear forwards`,
+                            animationPlayState: isPaused ? "paused" : "running",
+                          }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              // Muchos slides: contador + barra de progreso
+              <div className="flex items-center gap-3 w-full max-w-[220px]">
+                <span
+                  className="text-xs font-semibold tabular-nums"
+                  style={{ color: "var(--text, #584738)" }}
+                >
+                  {safeIndex + 1} / {pages}
+                </span>
+                <div
+                  className="relative flex-1 h-1.5 rounded-full overflow-hidden"
+                  style={{ background: "var(--border, #CEC1A8)" }}
+                >
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${((safeIndex + 1) / pages) * 100}%`,
+                      background: "var(--accent, #AAA396)",
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Keyframes de animación */}
+      {/* Keyframes */}
       <style>{`
-        @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(32px); }
-          to   { opacity: 1; transform: translateX(0); }
+        @keyframes galleryProgress {
+          from { transform: scaleX(0); }
+          to   { transform: scaleX(1); }
         }
-        @keyframes slideInLeft {
-          from { opacity: 0; transform: translateX(-32px); }
-          to   { opacity: 1; transform: translateX(0); }
+        @media (prefers-reduced-motion: reduce) {
+          [style*="galleryProgress"] { animation: none !important; transform: scaleX(1); }
         }
       `}</style>
     </section>
@@ -232,29 +352,25 @@ export default function GallerySection({
 // ────────────────────────────────────────────────
 function GalleryCard({
   item,
-  index,
   titleStyle,
+  imgRef,
 }: {
   item: { title?: string; image?: string };
-  index: number;
   titleStyle?: React.CSSProperties;
+  imgRef?: React.Ref<HTMLDivElement>;
 }) {
   const [hovered, setHovered] = useState(false);
 
   return (
     <div
-      className="flex flex-col items-center group cursor-pointer w-full max-w-full sm:max-w-[550px] lg:max-w-[550px] mx-auto"
-      style={{
-        // Entrada escalonada por índice
-        animation: `fadeUp 0.4s ease both`,
-        animationDelay: `${index * 60}ms`,
-      }}
+      className="flex flex-col items-center cursor-pointer w-full max-w-full sm:max-w-[550px] mx-auto select-none"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Imagen */}
       <div
-        className="w-full relative overflow-hidden  transition-all duration-300"
+        ref={imgRef}
+        className="w-full relative overflow-hidden rounded-2xl border transition-all duration-300"
         style={{
           aspectRatio: "1 / 1",
           background: "var(--card)",
@@ -269,13 +385,12 @@ function GalleryCard({
           <img
             src={item.image}
             alt={item.title || "Imagen"}
+            draggable={false}
+            loading="lazy"
             className="absolute inset-0 w-full h-full object-contain transition-transform duration-500"
-            style={{
-              transform: hovered ? "scale(1.07)" : "scale(1)",
-            }}
+            style={{ transform: hovered ? "scale(1.05)" : "scale(1)" }}
           />
         ) : (
-          // Placeholder si no hay imagen
           <div className="absolute inset-0 flex items-center justify-center">
             <span
               className="material-icons-round"
@@ -286,7 +401,7 @@ function GalleryCard({
           </div>
         )}
 
-        {/* Shimmer overlay en hover */}
+        {/* Brillo en hover */}
         <div
           className="absolute inset-0 transition-opacity duration-300 pointer-events-none"
           style={{
@@ -300,10 +415,12 @@ function GalleryCard({
       {/* Título del item */}
       {item.title && (
         <p
-          className="mt-3 text-center text-xs sm:text-sm font-semibold leading-tight transition-colors duration-200 px-1"
+          className="mt-3 text-center text-sm sm:text-sm font-semibold leading-tight transition-colors duration-200 px-2"
           style={{
             ...(titleStyle || {}),
-            color: hovered ? "var(--accent, #AAA396)" : (titleStyle?.color || "var(--text, #584738)"),
+            color: hovered
+              ? "var(--accent, #AAA396)"
+              : titleStyle?.color || "var(--text, #584738)",
           }}
         >
           {item.title}
